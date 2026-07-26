@@ -8,6 +8,10 @@
 
 #define RELAY_NUMBER 16
 
+#ifndef DEBUG
+#define DEBUG 1
+#endif
+
 extern TaskTimer rtcTask;
 extern TaskTimer i2cTask;
 extern TaskTimer sensorTask;

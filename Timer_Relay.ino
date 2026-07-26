@@ -15,7 +15,6 @@
 #include "I2CManager.h"
 
 #include "RelayManager.h"
-const int DEBUG = true; //false; // Software override for debug jumpers
 
 /*- SETUP PARAMETERS ------------------------------------------------------------------*/
 //const int relayNumber = 16;  // Total number of connected relays
@@ -55,16 +54,16 @@ const int DEBUG = true; //false; // Software override for debug jumpers
   #include "WebServer.h"
   const int iTriggerButton = 4;  // PIN D2: Manual Sequence Start, debounced push button
   const int iResetButton   = 5;  // PIN D5: stops active sequence, long press to toggle wifi
-  const int iComDebug      = 16; // PIN RX2 (GPIO 16): Enable Serial Debug, jumper read once on startup
-  const int iOutDebug      = 17; // PIN TX2 (GPIO 17): Enable Output Testing, jumper read once on startup
+  //const int iComDebug      = 16; // PIN RX2 (GPIO 16): Enable Serial Debug, jumper read once on startup
+  //const int iOutDebug      = 17; // PIN TX2 (GPIO 17): Enable Output Testing, jumper read once on startup
   const int oLedDebug      = LED_BUILTIN; // Uses ESP32 native built-in LED (GPIO 2)
   const unsigned long SERIAL_BAUD = 115200; // Recommended baud rate for ESP32
 #else
   // Arduino Nano configuration
   const int iTriggerButton = 2;  // PIN D2: Manual Sequence Start, debounced push button 
   const int iResetButton   = 5;  // PIN D5: stops active sequence
-  const int iComDebug      = 3;  // PIN D3: Enable Serial Debug, jumper read once on startup
-  const int iOutDebug      = 4;  // PIN D4: Enable Output Testing, jumper read once on startup
+  //const int iComDebug      = 3;  // PIN D3: Enable Serial Debug, jumper read once on startup
+  //const int iOutDebug      = 4;  // PIN D4: Enable Output Testing, jumper read once on startup
   const int oLedDebug      = LED_BUILTIN; // Uses Nano native built-in LED (Pin 13)
   const unsigned long SERIAL_BAUD = 9600;
 #endif
@@ -73,8 +72,8 @@ const int DEBUG = true; //false; // Software override for debug jumpers
 // Debug and initialization flags
 bool isFirstRun = true;
 int ErrState = 0;
-int ComDebug = false;
-int OutDebug = false;
+//int ComDebug = false;
+//int OutDebug = false;
 int MsgNum;
 
 // Subroutine execution timers
@@ -105,8 +104,8 @@ void runTimedSequence();
 void checkManualTrigger();
 void checkResetButton();
 void SerialMonitor(); 
-bool DeviceAlive();
-void RelayTest();
+bool DeviceAlive(byte Address, const char* Name);
+//void RelayTest();
 void printBin8();
 void serialPause();
 void checkSystemResetReason();
@@ -121,19 +120,19 @@ void setup() {
   pinMode(oLedDebug, OUTPUT);
   pinMode(iTriggerButton, INPUT_PULLUP);
   pinMode(iResetButton, INPUT_PULLUP);
-  pinMode(iComDebug, INPUT_PULLUP);
-  pinMode(iOutDebug, INPUT_PULLUP);
+//  pinMode(iComDebug, INPUT_PULLUP);
+//  pinMode(iOutDebug, INPUT_PULLUP);
 
   // Evaluate status configurations from hardware strapping pins
-  ComDebug = !digitalRead(iComDebug);
-  OutDebug = !digitalRead(iOutDebug);
+//  ComDebug = !digitalRead(iComDebug);
+//  OutDebug = !digitalRead(iOutDebug);
 
   // Clear memory registers for all output elements
   memset(relay, LOW, sizeof(relay));
 
   // Initialize hardware serial console
-  if(ComDebug | DEBUG){
-    Serial.begin(SERIAL_BAUD);
+  if(DEBUG){
+    DBG_BEGIN(SERIAL_BAUD);
     // Hold execution until terminal connects
    uint32_t serialStart = millis();
     while (!Serial && (millis() - serialStart < 2000)) {
@@ -141,11 +140,9 @@ void setup() {
     }
     //Serial.print("\n\x1B[H"\n); // Clear screen terminal escape sequence
     checkSystemResetReason();
-    Serial.print("Debug flags:");
-    Serial.print(DEBUG);
-    Serial.print(ComDebug);
-    Serial.print(OutDebug);
-    Serial.println('\n');
+    DBG_PRINT("Debug flags:");
+    DBG_PRINT(DEBUG);
+    DBG_PRINT('\n');
   }
 
   // Conditional I2C interface hardware setup
@@ -164,16 +161,12 @@ void setup() {
   rtcFound = rtcInit();
   if (!rtcFound) {
     DeviceAlive(0x68, "RTC");
-    if (ComDebug | DEBUG) {
-      Serial.println("RTC setup failed");
-    }
+    DBG_PRINT("RTC setup failed");
   }
   else{
     if (rtc.lostPower()){
       ErrState++;
-      if (ComDebug | DEBUG) {
-        Serial.println("RTC lost power, set the time!");
-      }
+      DBG_PRINT("RTC lost power, set the time!");
     }
     // Deactivate hardware auxiliary square wave generation channels
     rtc.disable32K();
@@ -186,11 +179,9 @@ void setup() {
     serverSetup();
   #endif
 
-  if(ComDebug | DEBUG){
-    Serial.print("\n\nSetup errors: ");
-    Serial.println(ErrState);
+  DBG_PRINT("\n\nSetup errors: ");
+  DBG_PRINT(ErrState);
     //serialPause();
-  }
 }
 void loop() {
   currentMillis = millis();
@@ -219,9 +210,7 @@ void loop() {
       if (Wire.getWireTimeoutFlag()) {
         Wire.clearWireTimeoutFlag();
         ErrState++;
-        if ( DEBUG | ComDebug ){ 
-          Serial.println("I2C bus timeout");
-        }
+        DBG_PRINT("I2C bus timeout");
       }
     #endif
 
@@ -256,8 +245,7 @@ void loop() {
       digitalWrite(oLedDebug, HIGH);
     }
     
-    // Process diagnostics outputs
-    RelayTest();  
+    // Process diagnostics outputs  
     SerialMonitor(); 
     isFirstRun = false;
     ErrState = 0;
@@ -318,9 +306,7 @@ void checkResetButton() {
           for (int i = 0; i < RELAY_NUMBER; i++) {
             relay[i] = LOW; // Immediately turn off all sequence relays
           }
-          if (ComDebug | DEBUG) {
-            Serial.println("\n[HARDWARE] Short Press: Relay sequence RESET.");
-          }
+          DBG_PRINT("\n[HARDWARE] Short Press: Relay sequence RESET.");
         }
       }
     }
@@ -329,7 +315,7 @@ void checkResetButton() {
 
 
 void SerialMonitor(){
-  if(!ComDebug & !DEBUG){ return; }
+  if(!DEBUG){ return; }
   
   Serial.print("\n\x1B[H\n- "); 
   Serial.print(MsgNum);
@@ -340,8 +326,6 @@ void SerialMonitor(){
 
   Serial.print("Inputs: ");
   Serial.print(lastButtonState);
-  Serial.print(ComDebug);
-  Serial.println(OutDebug);
 
   // Format and print current hardware RTC timestamps
   if (DeviceAlive(0x68, "RTC")) {
@@ -427,7 +411,7 @@ bool DeviceAlive( byte Address, const char* Name ){
   error = Wire.endTransmission();
   if (error != 0) {
     ErrState++;
-    if ( DEBUG | ComDebug ){
+    if ( DEBUG){
       Serial.print("Couldn't find ");
       Serial.print(Name);
       Serial.print(". Error: ");
@@ -483,6 +467,7 @@ void printBin8(uint8_t valore) {
   }
 }
 
+/*
 void RelayTest(){
   if( sequenceActive | (!OutDebug & !DEBUG) ){
     return;
@@ -504,6 +489,7 @@ void RelayTest(){
     relay[0] = HIGH;             
   }
 }
+*/
 
 void checkSystemResetReason() {
   #if defined(ARDUINO_ARCH_ESP32) || defined(ESP32)
