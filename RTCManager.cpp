@@ -1,4 +1,6 @@
+#include "I2CManager.h"
 #include "RTCManager.h"
+
 
 static DateTime cachedNow;
 
@@ -30,12 +32,22 @@ bool rtcInit(void)
 
 bool rtcUpdate(void)
 {
-    if (!rtcStatus.available)
+    rtcStatus.lastCheck = millis();
+
+    if (!i2cDevicePresent(0x68))
+    {
+        rtcStatus.available = false;
+        rtcStatus.state = DeviceState::ERROR;
+        rtcStatus.lastError = i2cLastError();
+        rtcStatus.errorCount++;
         return false;
+    }
+
+    rtcStatus.available = true;
+    rtcStatus.state = DeviceState::OK;
 
     cachedNow = rtc.now();
 
-    rtcStatus.lastCheck = millis();
     rtcStatus.lastOk = rtcStatus.lastCheck;
 
     return true;
