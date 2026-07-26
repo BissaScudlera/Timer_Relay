@@ -16,6 +16,7 @@ Obiettivi principali
 - Errori I²C mai bloccanti.
 - Recupero automatico delle periferiche.
 - Compatibilità completa Arduino IDE.
+- rimuovere le definizioni multipiattaforma, il prgetto è definitivamente solo per esp32
 
 ---
 
