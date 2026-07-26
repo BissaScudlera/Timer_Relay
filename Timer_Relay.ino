@@ -77,7 +77,12 @@ unsigned long previousMillis;
 
 #include <Wire.h> //I2C library
 DeviceStatus rtcStatus;
+
 DeviceStatus i2cStatus;
+
+DeviceStatus tempStatus;
+
+DeviceStatus relayStatus;
 
 // DS3231 RTC configurations
 #include "RTClib.h"

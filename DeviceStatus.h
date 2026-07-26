@@ -1,13 +1,29 @@
-enum DeviceState {
-    DEV_UNKNOWN,
-    DEV_OK,
-    DEV_ERROR,
-    DEV_RECOVERY
+#ifndef DEVICESTATUS_H
+#define DEVICESTATUS_H
+
+#include <Arduino.h>
+
+enum class DeviceState : uint8_t
+{
+    UNKNOWN = 0,
+    OK,
+    ERROR,
+    RECOVERY
 };
 
-struct DeviceStatus {
-    DeviceState state;
-    int lastError;
-    uint32_t lastOk;
-    uint32_t lastCheck;
+struct DeviceStatus
+{
+    DeviceState state = DeviceState::UNKNOWN;
+
+    int16_t lastError = 0;
+
+    uint32_t lastCheck = 0;
+
+    uint32_t lastOk = 0;
+
+    uint32_t errorCount = 0;
+
+    bool available = false;
 };
+
+#endif

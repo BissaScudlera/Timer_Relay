@@ -1,16 +1,38 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define FW_NAME        "Timer Relay ESP32"
-#define FW_MAJOR       1
-#define FW_MINOR       1
-#define FW_PATCH       0
+//=============================================================================
+// Firmware Identification
+//=============================================================================
 
-#define FW_BUILD_DATE  __DATE__
-#define FW_BUILD_TIME  __TIME__
+#define FW_NAME            "Timer Relay ESP32"
 
-#define FW_STRING  "1.1.0"
+#define FW_MAJOR           1
+#define FW_MINOR           1
+#define FW_PATCH           0
 
-const char* firmwareVersion();
+// Incrementare ad ogni compilazione ufficiale
+#define FW_BUILD           1
+
+//=============================================================================
+// Build Information
+//=============================================================================
+
+#define FW_BUILD_DATE      __DATE__
+#define FW_BUILD_TIME      __TIME__
+
+//=============================================================================
+// Hardware
+//=============================================================================
+
+#define HW_NAME            "ESP32 DEVKIT V1"
+#define HW_REVISION        "1.0"
+
+//=============================================================================
+// Project
+//=============================================================================
+
+#define PROJECT_AUTHOR     "BissaScudlera"
+#define PROJECT_REPOSITORY "https://github.com/BissaScudlera/Timer_Relay"
 
 #endif

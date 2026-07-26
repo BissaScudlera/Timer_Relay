@@ -1,5 +1,7 @@
 Timer_Relay Firmware Roadmap v2.0 by ChatGPT
 
+Ogni patch deve modificare al massimo 2 file esistenti e può aggiungere nuovi file.
+
 FASE 0 - Baseline
 
 Tag Git: v1.0.0

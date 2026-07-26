@@ -1,6 +1,5 @@
 #include "Version.h"
 
-const char* firmwareVersion()
-{
-    return FW_STRING;
-}
+const char* getFirmwareVersion();
+const char* getBuildDate();
+const char* getHardwareName();
