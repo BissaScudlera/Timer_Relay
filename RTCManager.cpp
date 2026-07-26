@@ -25,6 +25,8 @@ bool rtcInit(void)
     rtcStatus.available = true;
     rtcStatus.lastOk = millis();
 
+// TODO v1.1.8
+// Lettura protetta con gestione recovery
     cachedNow = rtc.now();
 
     return true;
@@ -35,17 +37,25 @@ bool rtcUpdate(void)
     rtcStatus.lastCheck = millis();
 
     if (!i2cDevicePresent(0x68))
+{
+    if (rtcStatus.available)
     {
-        rtcStatus.available = false;
-        rtcStatus.state = DeviceState::ERROR;
-        rtcStatus.lastError = i2cLastError();
         rtcStatus.errorCount++;
-        return false;
     }
+
+    rtcStatus.available = false;
+    rtcStatus.state = DeviceState::ERROR;
+    rtcStatus.lastError = i2cLastError();
+
+    return false;
+}
 
     rtcStatus.available = true;
     rtcStatus.state = DeviceState::OK;
+    rtcStatus.lastError = 0;
 
+// TODO v1.1.8
+// Lettura protetta con gestione recovery
     cachedNow = rtc.now();
 
     rtcStatus.lastOk = rtcStatus.lastCheck;
