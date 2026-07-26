@@ -351,7 +351,7 @@ void SerialMonitor(){
   if(config.startSecond < 10) Serial.print('0'); Serial.print(config.startSecond);
   Serial.println("]");
   Serial.print("Enabled Relays: [");
-  for(int i = 0; i < 7; i++) { Serial.print(config.relayEnableMask[i] ? '1' : '0'); }
+  for(int i = 0; i < (RELAY_NUMBER-1); i++) { Serial.print(config.relayEnableMask[i] ? '1' : '0'); }
   Serial.println("]");
   Serial.print("Active Days: [");
   for(int i = 0; i < 7; i++) {
