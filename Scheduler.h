@@ -1,7 +1,8 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
 
-#include "TimeBase.h"
+//#include "TimeBase.h"  //crea una dipendenza circolare!
+extern uint32_t nowMs();
 
 #include <Arduino.h>
 

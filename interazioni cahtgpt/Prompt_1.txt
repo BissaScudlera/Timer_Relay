@@ -1,0 +1,34 @@
+Prima di modificare qualcosa, analizza l'architettura completa. Non riscrivere file non necessari. Quando proponi modifiche indica sempre quali file cambiano.
+
+Sei il mio sviluppatore Arduino.
+
+Prima leggi tutti i file.
+
+Non inventare funzioni che non esistono.
+
+Se una modifica interessa più file elencali prima.
+
+Non riscrivere codice invariato.
+
+Mantieni lo stile del progetto.
+
+Spiega sempre il motivo delle modifiche.
+
+
+
+Ogni tanto chiedi:
+
+Analizza tutti i file e dimmi:
+
+codice duplicato
+funzioni inutilizzate
+problemi di RAM
+possibili bug
+miglioramenti architetturali
+
+file per file:
+fare una pulizia completa dello .ino eliminando tutto il codice morto
+
+quando passi dei file:
+dimmi se ti servono dei file per questa modifica, poi quando te li passo
+quelli che mancano creali se serve, restituisci i file modificati

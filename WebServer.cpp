@@ -14,23 +14,7 @@ WebServer server(80);
 bool webServerAttivo = true;
 
 //------------------------------------------------------------
-// Riferimenti esterni
-//------------------------------------------------------------
 
-extern String generaHtmlRele();
-extern String generaHtmlGiorni();
-
-extern int ErrState;
-
-extern const int iResetButton;
-
-extern unsigned long t_iReset;
-extern bool lastResetStatus;
-
-extern const unsigned long T_iResetLong;
-extern const unsigned long T_iResetShort;
-
-//------------------------------------------------------------
 
 void toggleWebServer()
 {

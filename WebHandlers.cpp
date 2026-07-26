@@ -42,7 +42,7 @@ void gestisciSalvaDurata()
 
         if (nuovaDurata > 0)
         {
-            relayDuration = nuovaDurata;
+            config.relayDuration = nuovaDurata;
         }
     }
 

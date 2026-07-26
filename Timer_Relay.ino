@@ -347,16 +347,16 @@ void SerialMonitor(){
 
   // Format scheduling metrics
   Serial.print("Target Time: [");
-  if(startHour < 10) Serial.print('0'); Serial.print(startHour); Serial.print(':');
-  if(startMinute < 10) Serial.print('0'); Serial.print(startMinute); Serial.print(':');
-  if(startSecond < 10) Serial.print('0'); Serial.print(startSecond);
+  if(config.startHour < 10) Serial.print('0'); Serial.print(config.startHour); Serial.print(':');
+  if(config.startMinute < 10) Serial.print('0'); Serial.print(config.startMinute); Serial.print(':');
+  if(config.startSecond < 10) Serial.print('0'); Serial.print(config.startSecond);
   Serial.println("]");
   Serial.print("Enabled Relays: [");
-  for(int i = 0; i < 7; i++) { Serial.print(relayEnableMask[i] ? '1' : '0'); }
+  for(int i = 0; i < 7; i++) { Serial.print(config.relayEnableMask[i] ? '1' : '0'); }
   Serial.println("]");
   Serial.print("Active Days: [");
   for(int i = 0; i < 7; i++) {
-    if (dayEnableMask[i]) {
+    if (config.dayEnableMask[i]) {
       Serial.print(shortDays[i]); 
     } else {
       Serial.print("--");         
@@ -373,7 +373,7 @@ void SerialMonitor(){
     Serial.print("/");
     Serial.print(RELAY_NUMBER);
     Serial.print(" | Time Remaining: ");
-    Serial.print(relayDuration - relayActiveSeconds);
+    Serial.print(config.relayDuration - relayActiveSeconds);
     Serial.println("s");
   } else {
     Serial.println("IDLE (Waiting for trigger)");
@@ -499,7 +499,7 @@ String generaHtmlRele() {
   String html = "";
   for(int i = 0; i < RELAY_NUMBER; i++) {
     html += "<div class='toggle-container'><span>V" + String(i+1) + "</span><label class='switch'>";
-    html += "<input type='checkbox' name='r" + String(i) + "' value='1'" + (relayEnableMask[i] ? " checked" : "") + ">";
+    html += "<input type='checkbox' name='r" + String(i) + "' value='1'" + (config.relayEnableMask[i] ? " checked" : "") + ">";
     html += "<span class='slider'></span></label></div>";
   }
   return html;
@@ -508,7 +508,7 @@ String generaHtmlGiorni() {
   String html = "";
   for(int i = 0; i < 7; i++) {
     html += "<div class='toggle-container'><span>" + String(shortDays[i]) + "</span><label class='switch'>";
-    html += "<input type='checkbox' name='d" + String(i) + "' value='1'" + (dayEnableMask[i] ? " checked" : "") + ">";
+    html += "<input type='checkbox' name='d" + String(i) + "' value='1'" + (config.dayEnableMask[i] ? " checked" : "") + ">";
     html += "<span class='slider'></span></label></div>";
   }
   return html;

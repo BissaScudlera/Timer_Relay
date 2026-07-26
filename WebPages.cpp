@@ -48,14 +48,14 @@ void gestisciRoot()
     }
 
     html += "<tr><td>Durata Canale:</td><td>";
-    html += String(relayDuration);
+    html += String(config.relayDuration);
     html += " s</td></tr>";
 
     if(sequenceActive)
     {
         unsigned long rimasti =
-            (relayDuration > relayActiveSeconds) ?
-            relayDuration - relayActiveSeconds : 0;
+            (config.relayDuration > relayActiveSeconds) ?
+            config.relayDuration - relayActiveSeconds : 0;
 
         html += "<tr><td>Valvola Attiva:</td><td>";
         html += String(currentRelayIndex + 1);
@@ -124,7 +124,7 @@ void gestisciSetup()
 
     html += "<div class='sezione'><h3>⏱️ Durata Irrigazione Valvole</h3>";
     html += "<form action='/salva-durata' method='POST'>";
-    html += "<input type='number' name='durata' min='1' value='" + String(relayDuration) + "' required>";
+    html += "<input type='number' name='durata' min='1' value='" + String(config.relayDuration) + "' required>";
     html += "<button type='submit' class='btn-save'>Salva Durata</button>";
     html += "</form></div>";
 

@@ -4,8 +4,8 @@
         void runTimedSequence() {
   // Automated scheduling evaluation logic
   if (!sequenceActive) {
-    if (dayEnableMask[now.dayOfTheWeek()]) {
-      if (now.hour() == startHour && now.minute() == startMinute && now.second() == startSecond) {
+    if (config.dayEnableMask[now.dayOfTheWeek()]) {
+      if (now.hour() == config.startHour && now.minute() == config.startMinute && now.second() == config.startSecond) {
         sequenceActive = true;
         sequenceInit = false; 
       }
@@ -20,7 +20,7 @@
     currentRelayIndex = 0;
 
     // Locate the first non-masked relay index 
-    while (currentRelayIndex < RELAY_NUMBER && !relayEnableMask[currentRelayIndex]) {
+    while (currentRelayIndex < RELAY_NUMBER && !config.relayEnableMask[currentRelayIndex]) {
       currentRelayIndex++;
     }
     if (currentRelayIndex < RELAY_NUMBER) { 
@@ -37,14 +37,14 @@
     relayActiveSeconds++;
 
     // Process step interval transitions upon context timeout
-    if (relayActiveSeconds >= relayDuration) {
+    if (relayActiveSeconds >= config.relayDuration) {
       relayActiveSeconds = 0;              
       relay[currentRelayIndex] = LOW;      
 
       // Advance index pointer while bypassing disabled entries
       do {
         currentRelayIndex++;
-      } while (currentRelayIndex < RELAY_NUMBER && !relayEnableMask[currentRelayIndex]);
+      } while (currentRelayIndex < RELAY_NUMBER && !config.relayEnableMask[currentRelayIndex]);
 
       // Commit to next element state or finalize pipeline execution
       if (currentRelayIndex < RELAY_NUMBER) {
