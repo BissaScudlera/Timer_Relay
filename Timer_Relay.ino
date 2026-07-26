@@ -10,6 +10,7 @@
 #include "Globals.h"
 #include "DeviceStatus.h"
 #include "RTCManager.h"
+#include "I2CManager.h"
 
 const int DEBUG = true; //false; // Software override for debug jumpers
 
@@ -165,13 +166,8 @@ void setup() {
   }
 
   // Conditional I2C interface hardware setup
-  #if defined(ARDUINO_ARCH_ESP32) || defined(ESP32)
-    Wire.begin(21, 22);  // Assign physical hardware pins for ESP32 I2C bus
+    i2cBegin();  // Assign physical hardware pins for ESP32 I2C bus
     #define _ESP32_BUS
-  #else
-    Wire.begin();        // Use default standard hardware pins for AVR architecture
-    Wire.setWireTimeout(25000, true);  // Enable AVR bus timeout management
-  #endif
 
   // Configure MCP23017 GPIO data direction registers
   if (DeviceAlive(0x20,"Relay Interface")){

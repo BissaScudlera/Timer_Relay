@@ -22,4 +22,31 @@ inline bool taskExpired(TaskTimer &task)
     return false;
 }
 
+inline void taskReset(TaskTimer &task)
+{
+    task.lastRunMs = millis();
+}
+
+inline void taskForce(TaskTimer &task)
+{
+    task.lastRunMs = millis() - task.periodMs;
+}
+
+inline uint32_t taskElapsed(const TaskTimer &task)
+{
+    return millis() - task.lastRunMs;
+}
+
+inline uint32_t taskRemaining(const TaskTimer &task)
+{
+    uint32_t elapsed = millis() - task.lastRunMs;
+
+    if (elapsed >= task.periodMs)
+        return 0;
+
+    return task.periodMs - elapsed;
+}
+
+
+
 #endif
