@@ -5,6 +5,8 @@
  Jack and Gemini
 **********************************************/
 #include <Arduino.h>
+#include "Version.h"
+#include "Globals.h"
 
 const int DEBUG = true; //false; // Software override for debug jumpers
 
@@ -73,6 +75,8 @@ unsigned long currentMillis = 0;
 unsigned long previousMillis;
 
 #include <Wire.h> //I2C library
+DeviceStatus rtcStatus;
+DeviceStatus i2cStatus;
 
 // DS3231 RTC configurations
 #include "RTClib.h"
