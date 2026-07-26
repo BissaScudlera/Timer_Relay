@@ -207,7 +207,7 @@ void setup() {
   if(ComDebug | DEBUG){
     Serial.print("\n\nSetup errors: ");
     Serial.println(ErrState);
-    serialPause();
+    //serialPause();
   }
 }
 void loop() {
