@@ -1,0 +1,246 @@
+Timer_Relay Firmware Roadmap v2.0 by ChatGPT
+
+FASE 0 - Baseline
+
+Tag Git: v1.0.0
+
+Obiettivo:
+
+nessuna modifica funzionale;
+creare un punto di ripristino.
+
+Test:
+
+compilazione;
+avvio;
+WiFi;
+RTC;
+relè;
+WebServer.
+FASE 1 - Hardening
+Patch 1.1.0
+Versioning
+
+Nuovi file
+
+Version.h
+
+Contiene
+
+FW_MAJOR
+FW_MINOR
+FW_PATCH
+Build Date
+Build Time
+
+Rischio
+
+Nullo
+
+Patch 1.1.1
+DeviceStatus
+
+Nuovo file
+
+DeviceStatus.h
+
+Introduce
+
+DeviceState
+
+DeviceStatus
+
+Ancora inutilizzato.
+
+Rischio
+
+Nullo
+
+Patch 1.1.2
+
+Eliminazione delay()
+
+Sostituire
+
+delay()
+
+while()
+
+
+con
+
+millis()
+
+yield()
+
+
+Rischio
+
+Basso
+
+Patch 1.1.3
+
+RTC watchdog
+
+Introduzione
+
+rtcAvailable()
+
+rtcRecover()
+
+
+Se il DS3231 scompare
+
+NON blocca il firmware.
+
+Visualizzazione
+
+--:--:--
+
+--/--/----
+Patch 1.1.4
+
+I²C watchdog
+
+Ogni periferica avrà
+
+OK
+
+ERROR
+
+RECOVERY
+
+mai
+
+while()
+
+mai
+
+ESP.restart()
+Patch 1.1.5
+
+WebServer resiliente
+
+Il WebServer
+
+NON usa direttamente
+
+rtc.now()
+
+
+ma legge
+
+cachedTime
+Patch 1.1.6
+
+Error manager
+
+Creazione
+
+Diagnostics.h
+
+Gestione
+
+ERR(1)
+
+ERR(2)
+
+ERR(5)
+
+FASE 2 - Modularizzazione
+Patch 1.2.0
+Globals.h
+Patch 1.2.1
+RelayManager.h
+
+RelayManager.cpp
+
+Spostamento funzioni relè
+
+Patch 1.2.2
+RTCManager.h
+
+RTCManager.cpp
+Patch 1.2.3
+I2CManager.h
+
+I2CManager.cpp
+Patch 1.2.4
+Diagnostics.cpp
+Patch 1.2.5
+ConfigManager
+
+EEPROM
+
+Alla fine
+
+Il file
+
+TemporizzatoreRele_ESP32.ino
+
+passerà da circa 600 righe a circa 150–200 righe.
+
+FASE 3 - Diagnostica
+
+Pagina
+
+/diag
+
+con
+
+Firmware
+
+Heap
+
+Stack
+
+Uptime
+
+WiFi RSSI
+
+RTC
+
+I²C
+
+Relay
+
+Temperature
+
+Reset reason
+FASE 4 - Ottimizzazione
+
+Riduzione RAM
+
+Eliminazione progressiva di
+
+String
+
+Sostituzione con
+
+snprintf()
+
+char[]
+
+Buffer statici
+
+FASE 5 - Sicurezza
+
+Watchdog software
+
+Log eventi
+
+Ring Buffer
+
+Cronologia errori
+
+FASE 6 - Funzioni avanzate
+
+OTA
+
+NTP
+
+Backup RTC
+
+JSON API
+
+MQTT
