@@ -21,3 +21,8 @@ uint8_t i2cLastError()
 {
     return lastError;
 }
+
+bool i2cOk()
+{
+    return i2cLastError() == 0;
+}

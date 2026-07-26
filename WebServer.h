@@ -4,8 +4,7 @@
 #ifdef ARDUINO_ARCH_ESP32
   #include <WiFi.h>
   #include <WebServer.h>
-  #include "RTClib.h"
-
+  
   // Credenziali Wi-Fi Access Point richieste
   const char* ssid = "irrigazione";
   const char* password = "michelone"; 
@@ -23,9 +22,9 @@
   extern bool relay[]; 
   extern const int relayNumber;
       extern bool rtcAvailable();
-  extern DateTime rtcNow();
-  extern const char* rtcTimeString();
+    extern const char* rtcTimeString();
   extern const char* rtcDateString();
+extern bool rtcSetTime(uint8_t hour,uint8_t minute);
   extern int ErrState;
   extern const int iResetButton; 
   
@@ -70,8 +69,8 @@
     else { html += "<p class='stato spento'>○ SISTEMA IN ATTESA</p>"; }
 
     html += "<table class='info-table'>";
-    if (rtcAvailable() /* patched */) {
-      html += "<tr><td>Orario RTC:</td><td>" + String(rtcTimeString()) + "</td></tr";
+    if (rtcAvailable()) {
+      html += "<tr><td>Orario RTC:</td><td>" + String(rtcTimeString()) + "</td></tr>";
     }
     html += "<tr><td>Durata Canale:</td><td>" + String(relayDuration) + " s</td></tr>";
     if (sequenceActive) {
@@ -122,7 +121,7 @@
     html += "<button type='submit' class='btn-save'>Salva Durata</button>";
     html += "</form></div>";
 
-    if (rtcAvailable() /* patched */) {
+    if (rtcAvailable()) {
       DateTime dt = rtcNow();
       char oraAttuale[6];
       snprintf(oraAttuale,sizeof(oraAttuale),"%02d:%02d",dt.hour(),dt.minute());
@@ -156,7 +155,7 @@
   void gestisciStart() { if (!sequenceActive) { sequenceActive = true; sequenceInit = false; } server.sendHeader("Location", "/setup"); server.send(303); }
   void gestisciStop() { sequenceActive = false; sequenceInit = false; for (int i = 0; i < relayNumber; i++) { relay[i] = LOW; } server.sendHeader("Location", "/setup"); server.send(303); }
   void gestisciSalvaDurata() { if (server.hasArg("durata")) { long nuovaDurata = server.arg("durata").toInt(); if (nuovaDurata > 0) { relayDuration = nuovaDurata; } } server.sendHeader("Location", "/setup"); server.send(303); }
-  void gestisciSalvaOra() { if (rtcAvailable() /* patched */ && server.hasArg("orario")) { String t = server.arg("orario"); int h = t.substring(0, 2).toInt(); int m = t.substring(3, 5).toInt(); DateTime dt=rtcNow(); rtc.adjust(DateTime(dt.year(), dt.month(), dt.day(), h, m, 0)); } server.sendHeader("Location", "/setup"); server.send(303); }
+  void gestisciSalvaOra() { if (rtcAvailable() /* patched */ && server.hasArg("orario")) { String t = server.arg("orario"); int h = t.substring(0, 2).toInt(); int m = t.substring(3, 5).toInt(); DateTime dt=rtcNow(); rtcSetTime(h,m); } server.sendHeader("Location", "/setup"); server.send(303); }
   
   void gestisciSalvaMaschere() { 
     // Aggiorniamo le maschere in modo indiretto basandoci sulle stringhe inviate

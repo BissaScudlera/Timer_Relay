@@ -36,3 +36,8 @@
 #define PROJECT_REPOSITORY "https://github.com/BissaScudlera/Timer_Relay"
 
 #endif
+
+// Public API
+const char* getFirmwareVersion();
+const char* getBuildDate();
+const char* getHardwareName();

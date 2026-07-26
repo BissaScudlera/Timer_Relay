@@ -1,3 +1,7 @@
+#ifndef FW_BUILD_DATE
+#define FW_BUILD_DATE __DATE__ " " __TIME__
+#endif
+
 TaskTimer rtcTask        = {1000, 0};
 TaskTimer i2cTask        = {5000, 0};
 TaskTimer sensorTask     = {1000, 0};

@@ -1,15 +1,16 @@
-rtcOk()
+#ifndef DIAGNOSTICS_H
+#define DIAGNOSTICS_H
 
-i2cOk()
+#include "RTCManager.h"
+#include "I2CManager.h"
 
-wifiOk()
+inline bool rtcOk(){ return rtcGetStatus().available; }
+inline bool i2cOk(){ return i2cLastError()==0; }
+inline bool wifiOk(){ return true; }
 
-
-// Returns a compact diagnostics summary.
 inline const char* diagnosticsSummary(){ return "RTC/I2C/WiFi"; }
+inline const char* diagnosticsRtcState(){ return rtcOk() ? "OK":"ERROR"; }
+inline const char* diagnosticsI2CState(){ return i2cOk() ? "OK":"ERROR"; }
+inline const char* diagnosticsWiFiState(){ return wifiOk() ? "OK":"ERROR"; }
 
-
-// Diagnostic helper APIs
-inline const char* diagnosticsRtcState(){ return rtcOk() ? "OK" : "ERROR"; }
-inline const char* diagnosticsI2CState(){ return i2cOk() ? "OK" : "ERROR"; }
-inline const char* diagnosticsWiFiState(){ return wifiOk() ? "OK" : "ERROR"; }
+#endif

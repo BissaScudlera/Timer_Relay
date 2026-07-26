@@ -9,6 +9,24 @@ static char dateBuffer[11];
 
 static bool rtcReadCached(DateTime &value);
 
+static void rtcSetError(int error)
+{
+    if (rtcStatus.available)
+    {
+        rtcStatus.errorCount++;
+    }
+    rtcStatus.available = false;
+    rtcStatus.state = DeviceState::ERROR;
+    rtcStatus.lastError = error;
+}
+
+static void rtcSetOk()
+{
+    rtcStatus.available = true;
+    rtcStatus.state = DeviceState::OK;
+    rtcStatus.lastError = 0;
+}
+
 bool rtcInit(void)
 {
     rtcStatus.lastCheck = millis();
@@ -67,27 +85,12 @@ bool rtcUpdate(void)
 {
     rtcStatus.lastCheck = millis();
 
-    if (!i2cDevicePresent(0x68))
-{
-    if (rtcStatus.available)
-    {
-        rtcStatus.errorCount++;
-    }
-
-    rtcStatus.available = false;
-    rtcStatus.state = DeviceState::ERROR;
-    rtcStatus.lastError = i2cLastError();
-
-    return false;
-}
-
     if (!rtcReadCached(cachedNow))
     {
         return false;
     }
 
     rtcStatus.lastOk = rtcStatus.lastCheck;
-
     return true;
 }
 
@@ -143,20 +146,12 @@ static bool rtcReadCached(DateTime &value)
 {
     if (!i2cDevicePresent(RTC_I2C_ADDRESS))
     {
-        if (rtcStatus.available)
-        {
-            rtcStatus.errorCount++;
-        }
-        rtcStatus.available = false;
-        rtcStatus.state = DeviceState::ERROR;
-        rtcStatus.lastError = i2cLastError();
+        rtcSetError(i2cLastError());
         return false;
     }
 
     value = rtc.now();
-    rtcStatus.available = true;
-    rtcStatus.state = DeviceState::OK;
-    rtcStatus.lastError = 0;
+    rtcSetOk();
     return true;
 }
 
@@ -164,4 +159,36 @@ static bool rtcReadCached(DateTime &value)
 const DeviceStatus& rtcGetStatus(void)
 {
     return rtcStatus;
+}
+
+bool rtcSetDateTime(const DateTime& dt)
+{
+    if (!rtcStatus.available)
+        return false;
+
+    rtc.adjust(dt);
+    cachedNow = dt;
+    rtcStatus.lastOk = millis();
+    rtcStatus.lastError = 0;
+    rtcStatus.state = DeviceState::OK;
+
+    return true;
+}
+
+bool rtcSetTime(uint8_t hour, uint8_t minute)
+{
+    DateTime now;
+
+    if (!rtcReadCached(now))
+        return false;
+
+    DateTime updated(
+        now.year(),
+        now.month(),
+        now.day(),
+        hour,
+        minute,
+        0);
+
+    return rtcSetDateTime(updated);
 }

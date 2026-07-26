@@ -26,6 +26,10 @@ DateTime rtcNow(void);
 const char* rtcTimeString(void);
 const char* rtcDateString(void);
 
-#endif
-// Returns RTC diagnostic status
+bool rtcSetTime(uint8_t hour, uint8_t minute);
+bool rtcSetDateTime(const DateTime& dt);
+
 const DeviceStatus& rtcGetStatus(void);
+
+
+#endif

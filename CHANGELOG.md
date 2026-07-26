@@ -1,3 +1,11 @@
+
+
+## [1.2.8] - 2026-07-26
+
+### Changed
+- Completed Version module public API.
+- Prepared firmware for WebServer decoupling.
+
 # Changelog
 
 Tutte le modifiche rilevanti al firmware sono documentate in questo file.
