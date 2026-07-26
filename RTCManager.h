@@ -24,6 +24,7 @@ const char* rtcTimeString(void);
 const char* rtcDateString(void);
 
 bool rtcSetTime(uint8_t hour, uint8_t minute);
+float rtcTemperature(void);
 bool rtcSetDateTime(const DateTime& dt);
 
 const DeviceStatus& rtcGetStatus(void);

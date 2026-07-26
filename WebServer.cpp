@@ -60,14 +60,21 @@ void serverSetup()
         DBG_PRINT("[WI-FI] IP: 192.168.4.1\n");
 
         server.on("/",              gestisciRoot);
-        server.on("/setup",         gestisciSetup);
+        server.on("/comandi",       gestisciComandi);
+        server.on("/config",        gestisciConfigurazione);
+        server.on("/sistema",       gestisciSistema);
+        server.on("/setupRTC",      gestisciSetupRTC);
+        server.on("/setupWiFi",     gestisciSetupWiFi);
+        // compatibilita vecchio link
+        server.on("/setup",         gestisciConfigurazione);
 
         server.on("/start", HTTP_POST, gestisciStart);
         server.on("/stop", HTTP_POST, gestisciStop);
 
-        server.on("/salva-durata", HTTP_POST, gestisciSalvaDurata);
-        server.on("/salva-ora", HTTP_POST, gestisciSalvaOra);
         server.on("/salva-maschere", HTTP_POST, gestisciSalvaMaschere);
+        server.on("/salva-rtc", HTTP_POST, gestisciSalvaRTC);
+        server.on("/salva-wifi", HTTP_POST, gestisciSalvaWiFi);
+        server.on("/salva-wifi-eeprom", HTTP_POST, gestisciSalvaWiFiEEPROM);
 
         server.begin();
 

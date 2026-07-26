@@ -3,7 +3,6 @@
 #ifdef ARDUINO_ARCH_ESP32
 
 #include <Arduino.h>
-
 #include "Globals.h"
 #include "RTCManager.h"
 #include "RelayManager.h"
@@ -12,68 +11,102 @@
 void gestisciStart()
 {
     relayStart();
-
-    server.sendHeader("Location", "/setup");
+    server.sendHeader("Location", "/comandi");
     server.send(303);
 }
 
 void gestisciStop()
 {
     relayStop();
-
-    server.sendHeader("Location", "/setup");
-    server.send(303);
-}
-
-void gestisciSalvaDurata()
-{
-    if (server.hasArg("durata"))
-    {
-        long nuovaDurata = server.arg("durata").toInt();
-
-        if (nuovaDurata > 0)
-        {
-            config.relayDuration = nuovaDurata;
-        }
-    }
-
-    server.sendHeader("Location", "/setup");
-    server.send(303);
-}
-
-void gestisciSalvaOra()
-{
-    if (rtcGetStatus().available && server.hasArg("orario"))
-    {
-        String t = server.arg("orario");
-
-        int h = t.substring(0, 2).toInt();
-        int m = t.substring(3, 5).toInt();
-
-        rtcSetTime(h, m);
-    }
-
-    server.sendHeader("Location", "/setup");
+    server.sendHeader("Location", "/comandi");
     server.send(303);
 }
 
 void gestisciSalvaMaschere()
 {
-    // Relè
     for (int i = 0; i < RELAY_NUMBER; i++)
     {
-        String nome = "r" + String(i);
-        config.relayEnableMask[i] = server.hasArg(nome);
+        config.relayEnableMask[i] = server.hasArg("r" + String(i));
     }
 
-    // Giorni
     for (int i = 0; i < 7; i++)
     {
-        String nome = "d" + String(i);
-        config.dayEnableMask[i] = server.hasArg(nome);
+        config.dayEnableMask[i] = server.hasArg("d" + String(i));
     }
 
-    server.sendHeader("Location", "/setup");
+    if (server.hasArg("durata"))
+    {
+        unsigned long d = server.arg("durata").toInt();
+        if (d > 0) config.relayDuration = d;
+    }
+
+    if (server.hasArg("orario"))
+    {
+        String t = server.arg("orario");
+        config.startHour = t.substring(0,2).toInt();
+        config.startMinute = t.substring(3,5).toInt();
+        config.startSecond = 0;
+    }
+
+    server.sendHeader("Location", "/");
     server.send(303);
 }
+
+void gestisciSalvaRTC()
+{
+    if (server.hasArg("data") && server.hasArg("ora"))
+    {
+        String d = server.arg("data");
+        String o = server.arg("ora");
+
+        int giorno = d.substring(8,10).toInt();
+        int mese = d.substring(5,7).toInt();
+        int anno = d.substring(0,4).toInt();
+        int ora = o.substring(0,2).toInt();
+        int minuto = o.substring(3,5).toInt();
+        int secondo = o.substring(6,8).toInt();
+
+        rtcSetDateTime(DateTime(anno,mese,giorno,ora,minuto,secondo));
+    }
+
+    server.sendHeader("Location", "/");
+    server.send(303);
+}
+
+
+void gestisciSalvaWiFi()
+{
+    if(server.hasArg("ssid") && server.hasArg("password"))
+    {
+        String nuovoSSID = server.arg("ssid");
+        String nuovaPassword = server.arg("password");
+
+        if(nuovoSSID.length() > 0 && nuovaPassword.length() >= 8)
+        {
+            ssid = strdup(nuovoSSID.c_str());
+            password = strdup(nuovaPassword.c_str());
+
+            WiFi.softAPdisconnect(true);
+            delay(100);
+            WiFi.softAP(ssid, password);
+        }
+    }
+
+    server.sendHeader("Location", "/");
+    server.send(303);
+}
+
+
+void gestisciSalvaWiFiEEPROM()
+{
+    // FUTURO:
+    // Salvataggio permanente configurazione WiFi su EEPROM/NVS.
+    // Parametri previsti:
+    // - SSID
+    // - password
+    // - configurazione rete AP
+    //
+    // Attualmente la configurazione WiFi resta solo in memoria volatile.
+}
+
 #endif

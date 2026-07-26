@@ -9,6 +9,10 @@ void gestisciSalvaDurata();
 void gestisciSalvaOra();
 void gestisciSalvaMaschere();
 
+void gestisciSalvaRTC();
+void gestisciSalvaWiFi();
+void gestisciSalvaWiFiEEPROM();
+
 #endif
 
 #endif

@@ -1,11 +1,12 @@
- #ifndef WEB_PAGES_H
-#define WEB_PAGES_H
+#pragma once
 
 #ifdef ARDUINO_ARCH_ESP32
 
 void gestisciRoot();
-void gestisciSetup();
-
-#endif
+void gestisciComandi();
+void gestisciConfigurazione();
+void gestisciSistema();
+void gestisciSetupRTC();
+void gestisciSetupWiFi();
 
 #endif

@@ -8,8 +8,8 @@
 #define FW_NAME            "Timer Relay ESP32"
 
 #define FW_MAJOR           1
-#define FW_MINOR           1
-#define FW_PATCH           0
+#define FW_MINOR           5
+#define FW_PATCH           10
 
 // Incrementare ad ogni compilazione ufficiale
 #define FW_BUILD           1

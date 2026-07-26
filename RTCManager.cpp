@@ -161,3 +161,11 @@ bool rtcSetTime(uint8_t hour, uint8_t minute)
 
     return rtcSetDateTime(updated);
 }
+
+float rtcTemperature(void)
+{
+    if (!rtcStatus.available)
+        return NAN;
+
+    return rtc.getTemperature();
+}

@@ -2,8 +2,9 @@
 
 /*********************************************
  Relay Timer
- V 0.9 (Multi-Architecture Update Nano/ESP32)
- Jack, Gemini and ChatGPT
+ V 1.8.9 (ESP32 web interface)
+ Written by Jack and Gemini
+ Refactored byChatGPT
 **********************************************/
 #include <Arduino.h>
 #include "Version.h"
