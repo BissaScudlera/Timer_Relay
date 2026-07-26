@@ -23,7 +23,7 @@ bool rtcInit(void)
 
     rtcStatus.state = DeviceState::OK;
     rtcStatus.available = true;
-    rtcStatus.lastOk = millis();
+    rtcStatus.lastOk = rtcStatus.lastCheck;
 
 // TODO v1.1.8
 // Lettura protetta con gestione recovery
