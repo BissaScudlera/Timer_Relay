@@ -70,6 +70,12 @@ void runTimedSequence()
 
     if (state == RelayState::Starting)
     {
+        if (config.relayDuration == 0) {
+          state = RelayState::Finished;
+          currentRelayIndex = 0;
+          relayStartMs = 0;
+          return;
+        }
         state = RelayState::Running;
 
         memset(relay, LOW, sizeof(relay));
