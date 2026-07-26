@@ -4,13 +4,32 @@
 #include "RTCManager.h"
 #include "I2CManager.h"
 
-inline bool rtcOk(){ return rtcGetStatus().available; }
-inline bool i2cOk(){ return i2cLastError()==0; }
-inline bool wifiOk(){ return true; }
+//------------------------------------------------------------
+// Stato sintetico dei moduli
+//------------------------------------------------------------
 
-inline const char* diagnosticsSummary(){ return "RTC/I2C/WiFi"; }
-inline const char* diagnosticsRtcState(){ return rtcOk() ? "OK":"ERROR"; }
-inline const char* diagnosticsI2CState(){ return i2cOk() ? "OK":"ERROR"; }
-inline const char* diagnosticsWiFiState(){ return wifiOk() ? "OK":"ERROR"; }
+inline const char* diagnosticsRtcState()
+{
+    return rtcGetStatus().available ? "OK" : "ERROR";
+}
+
+inline const char* diagnosticsI2CState()
+{
+    return i2cGetStatus().available ? "OK" : "ERROR";
+}
+
+inline const char* diagnosticsWiFiState()
+{
+#ifdef ARDUINO_ARCH_ESP32
+    return "OK";
+#else
+    return "N/A";
+#endif
+}
+
+inline const char* diagnosticsSummary()
+{
+    return "RTC / I2C / WiFi";
+}
 
 #endif

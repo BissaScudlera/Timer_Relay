@@ -52,7 +52,7 @@ void gestisciSalvaDurata()
 
 void gestisciSalvaOra()
 {
-    if (rtcAvailable() && server.hasArg("orario"))
+    if (rtcGetStatus().available && server.hasArg("orario"))
     {
         String t = server.arg("orario");
 

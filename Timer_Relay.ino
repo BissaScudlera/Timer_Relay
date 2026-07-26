@@ -54,16 +54,12 @@
   #include "WebServer.h"
   const int iTriggerButton = 4;  // PIN D2: Manual Sequence Start, debounced push button
   const int iResetButton   = 5;  // PIN D5: stops active sequence, long press to toggle wifi
-  //const int iComDebug      = 16; // PIN RX2 (GPIO 16): Enable Serial Debug, jumper read once on startup
-  //const int iOutDebug      = 17; // PIN TX2 (GPIO 17): Enable Output Testing, jumper read once on startup
   const int oLedDebug      = LED_BUILTIN; // Uses ESP32 native built-in LED (GPIO 2)
   const unsigned long SERIAL_BAUD = 115200; // Recommended baud rate for ESP32
 #else
   // Arduino Nano configuration
   const int iTriggerButton = 2;  // PIN D2: Manual Sequence Start, debounced push button 
   const int iResetButton   = 5;  // PIN D5: stops active sequence
-  //const int iComDebug      = 3;  // PIN D3: Enable Serial Debug, jumper read once on startup
-  //const int iOutDebug      = 4;  // PIN D4: Enable Output Testing, jumper read once on startup
   const int oLedDebug      = LED_BUILTIN; // Uses Nano native built-in LED (Pin 13)
   const unsigned long SERIAL_BAUD = 9600;
 #endif
@@ -72,8 +68,6 @@
 // Debug and initialization flags
 bool isFirstRun = true;
 int ErrState = 0;
-//int ComDebug = false;
-//int OutDebug = false;
 int MsgNum;
 
 // Subroutine execution timers
@@ -103,12 +97,14 @@ const unsigned long T_iResetShort = 50;      // Minimum debounce threshold for s
 void runTimedSequence();
 void checkManualTrigger();
 void checkResetButton();
-void SerialMonitor(); 
 bool DeviceAlive(byte Address, const char* Name);
 //void RelayTest();
 void printBin8();
-void serialPause();
+#if DEBUG
+void SerialMonitor(); 
 void checkSystemResetReason();
+void serialPause();
+#endif
 #ifdef WEB_SERVER_H
   String generaHtmlRele();
   String generaHtmlGiorni();
@@ -120,18 +116,14 @@ void setup() {
   pinMode(oLedDebug, OUTPUT);
   pinMode(iTriggerButton, INPUT_PULLUP);
   pinMode(iResetButton, INPUT_PULLUP);
-//  pinMode(iComDebug, INPUT_PULLUP);
-//  pinMode(iOutDebug, INPUT_PULLUP);
 
   // Evaluate status configurations from hardware strapping pins
-//  ComDebug = !digitalRead(iComDebug);
-//  OutDebug = !digitalRead(iOutDebug);
 
   // Clear memory registers for all output elements
   memset(relay, LOW, sizeof(relay));
 
   // Initialize hardware serial console
-  if(DEBUG){
+  #if DEBUG
     DBG_BEGIN(SERIAL_BAUD);
     // Hold execution until terminal connects
    uint32_t serialStart = millis();
@@ -143,7 +135,7 @@ void setup() {
     DBG_PRINT("Debug flags:");
     DBG_PRINT(DEBUG);
     DBG_PRINT('\n');
-  }
+  #endif
 
   // Conditional I2C interface hardware setup
     i2cBegin();  // Assign physical hardware pins for ESP32 I2C bus
@@ -158,8 +150,8 @@ void setup() {
   }
   
   // Validate real-time clock operational status
-  rtcFound = rtcInit();
-  if (!rtcFound) {
+  rtcInit();
+  if (!rtcGetStatus().available) {
     DeviceAlive(0x68, "RTC");
     DBG_PRINT("RTC setup failed");
   }
@@ -181,7 +173,9 @@ void setup() {
 
   DBG_PRINT("\n\nSetup errors: ");
   DBG_PRINT(ErrState);
+  #if DEBUG
     //serialPause();
+  #endif
 }
 void loop() {
   currentMillis = millis();
@@ -196,7 +190,7 @@ void loop() {
 
   // Primary execution block triggered exactly once per second
   if (currentMillis - previousMillis >= 1000) {
-    if (!rtcAvailable())
+    if (!rtcGetStatus().available)
     {
       if (taskExpired(rtcRecoveryTask))
       {
@@ -215,7 +209,7 @@ void loop() {
     #endif
 
     // Query active clock timestamp from hardware rtc element
-    if ( rtcFound & DeviceAlive(0x68, "RTC") ){
+    if ( rtcGetStatus().available && DeviceAlive(0x68, "RTC") ){
       now = rtcNow();
     }
 
@@ -245,8 +239,10 @@ void loop() {
       digitalWrite(oLedDebug, HIGH);
     }
     
-    // Process diagnostics outputs  
+    // Process diagnostics outputs
+    #if DEBUG	
     SerialMonitor(); 
+	#endif
     isFirstRun = false;
     ErrState = 0;
   }
@@ -313,7 +309,7 @@ void checkResetButton() {
   }
 }
 
-
+#if DEBUG
 void SerialMonitor(){
   if(!DEBUG){ return; }
   
@@ -405,13 +401,31 @@ void SerialMonitor(){
   return;
 }
 
+void serialPause(){
+  if ( DEBUG ){
+    Serial.println("\nPress any key to continue...");
+    while (Serial.available() == 0) {
+      delay(100); //Prevent ESP32 watchdog triggers by yielding processor time to background routines
+      digitalWrite(LED_BUILTIN, LOW);
+      delay(400);
+      digitalWrite(LED_BUILTIN, HIGH);
+      
+    }
+    while (Serial.available() > 0) {
+      Serial.read(); 
+    }
+  }
+}
+
+#endif
+
 bool DeviceAlive( byte Address, const char* Name ){
   byte error=0;
   Wire.beginTransmission(Address);
   error = Wire.endTransmission();
   if (error != 0) {
     ErrState++;
-    if ( DEBUG){
+    #if DEBUG
       Serial.print("Couldn't find ");
       Serial.print(Name);
       Serial.print(". Error: ");
@@ -439,26 +453,10 @@ bool DeviceAlive( byte Address, const char* Name ){
           Serial.println("Unknown I2C error");
           break;
       }
-    }
+    #endif
     return false;
   }
   return true;
-}
-
-void serialPause(){
-  if ( DEBUG ){
-    Serial.println("\nPress any key to continue...");
-    while (Serial.available() == 0) {
-      delay(100); //Prevent ESP32 watchdog triggers by yielding processor time to background routines
-      digitalWrite(LED_BUILTIN, LOW);
-      delay(400);
-      digitalWrite(LED_BUILTIN, HIGH);
-      
-    }
-    while (Serial.available() > 0) {
-      Serial.read(); 
-    }
-  }
 }
 
 void printBin8(uint8_t valore) {
@@ -467,30 +465,8 @@ void printBin8(uint8_t valore) {
   }
 }
 
-/*
-void RelayTest(){
-  if( sequenceActive | (!OutDebug & !DEBUG) ){
-    return;
-  }
-  // Incrementally cycle array elements during idle testing parameters
-  for(int i = 0; i < RELAY_NUMBER; i++) {
-    if(relay[i] == HIGH) {
-      relay[i] = LOW;
-      if(i==RELAY_NUMBER-1){
-        break;  
-      }else{
-        relay[i+1] = HIGH;
-      }
-      break;
-    }
-  }
-  // Default fallback assignment routines during initial loop
-  if (isFirstRun && *(uint16_t*)relay == 0) {  
-    relay[0] = HIGH;             
-  }
-}
-*/
 
+#if DEBUG
 void checkSystemResetReason() {
   #if defined(ARDUINO_ARCH_ESP32) || defined(ESP32)
     esp_reset_reason_t reason = esp_reset_reason();
@@ -516,7 +492,7 @@ void checkSystemResetReason() {
     Serial.print("\nHello!\n");
   #endif
 }
-
+#endif
 #ifdef WEB_SERVER_H
 // GENERA GLI SWITCH HTML deve accedere direttamente agli array del programma principale
 String generaHtmlRele() {

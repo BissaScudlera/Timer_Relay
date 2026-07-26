@@ -40,7 +40,7 @@ void gestisciRoot()
 
     html += "<table class='info-table'>";
 
-    if(rtcAvailable())
+    if(rtcGetStatus().available)
     {
         html += "<tr><td>Orario RTC:</td><td>";
         html += rtcTimeString();
@@ -128,7 +128,7 @@ void gestisciSetup()
     html += "<button type='submit' class='btn-save'>Salva Durata</button>";
     html += "</form></div>";
 
-    if(rtcAvailable())
+    if(rtcGetStatus().available)
     {
         DateTime dt = rtcNow();
 

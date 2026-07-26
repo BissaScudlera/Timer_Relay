@@ -16,9 +16,6 @@ bool rtcRecover(void);
 // Aggiornamento periodico (placeholder)
 bool rtcUpdate(void);
 
-// Stato RTC
-bool rtcAvailable(void);
-
 // Restituisce l'ultima data/ora valida
 DateTime rtcNow(void);
 

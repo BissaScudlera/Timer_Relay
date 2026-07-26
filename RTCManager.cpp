@@ -9,41 +9,17 @@ static char dateBuffer[11];
 
 static bool rtcReadCached(DateTime &value);
 
-static void rtcSetError(int error)
-{
-    if (rtcStatus.available)
-    {
-        rtcStatus.errorCount++;
-    }
-    rtcStatus.available = false;
-    rtcStatus.state = DeviceState::ERROR;
-    rtcStatus.lastError = error;
-}
-
-static void rtcSetOk()
-{
-    rtcStatus.available = true;
-    rtcStatus.state = DeviceState::OK;
-    rtcStatus.lastError = 0;
-}
-
 bool rtcInit(void)
 {
     rtcStatus.lastCheck = millis();
 
     if (!rtc.begin())
     {
-        rtcStatus.state = DeviceState::ERROR;
-        rtcStatus.available = false;
-        rtcStatus.lastError = -1;
-        rtcStatus.errorCount++;
-
+        rtcStatus.setError(-1);
         return false;
     }
 
-    rtcStatus.state = DeviceState::OK;
-    rtcStatus.available = true;
-    rtcStatus.lastOk = rtcStatus.lastCheck;
+    rtcStatus.setOk();
 
     if (!rtcReadCached(cachedNow))
     {
@@ -67,7 +43,7 @@ bool rtcRecover(void)
 
     if (!rtc.begin())
     {
-        rtcStatus.lastError = -1;
+        rtcStatus.setError(-1);
         return false;
     }
 
@@ -76,8 +52,7 @@ bool rtcRecover(void)
         return false;
     }
 
-    rtcStatus.lastOk = millis();
-
+    rtcStatus.setOk();
     return true;
 }
 
@@ -90,14 +65,10 @@ bool rtcUpdate(void)
         return false;
     }
 
-    rtcStatus.lastOk = rtcStatus.lastCheck;
+    rtcStatus.setOk();
     return true;
 }
 
-bool rtcAvailable(void)
-{
-    return rtcStatus.available;
-}
 
 DateTime rtcNow(void)
 {
@@ -146,12 +117,12 @@ static bool rtcReadCached(DateTime &value)
 {
     if (!i2cDevicePresent(RTC_I2C_ADDRESS))
     {
-        rtcSetError(i2cLastError());
+        rtcStatus.setError(i2cLastError());
         return false;
     }
 
     value = rtc.now();
-    rtcSetOk();
+    rtcStatus.setOk();
     return true;
 }
 
@@ -168,9 +139,7 @@ bool rtcSetDateTime(const DateTime& dt)
 
     rtc.adjust(dt);
     cachedNow = dt;
-    rtcStatus.lastOk = millis();
-    rtcStatus.lastError = 0;
-    rtcStatus.state = DeviceState::OK;
+    rtcStatus.setOk();
 
     return true;
 }

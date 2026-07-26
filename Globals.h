@@ -22,7 +22,6 @@ extern TaskTimer rtcRecoveryTask;
 
 extern RTC_DS3231 rtc;
 extern DateTime now;
-extern bool rtcFound;
 
 extern MCP23017 mcp1;
 

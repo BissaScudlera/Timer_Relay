@@ -11,7 +11,6 @@ TaskTimer rtcRecoveryTask = {5000, 0};
 
 RTC_DS3231 rtc;
 DateTime now;
-bool rtcFound=false;
 
 MCP23017 mcp1(0x20);
 
