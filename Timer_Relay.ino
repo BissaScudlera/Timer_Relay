@@ -260,9 +260,8 @@ void checkManualTrigger() {
 
   if ((millis() - lastDebounceTime) > debounceDelay) {
     // Assert active sequence status if edge requirements evaluate true
-    if (reading == LOW && !sequenceActive) {
-      sequenceActive = true;
-      sequenceInit = false; 
+    if (reading == LOW && !relayRunning()) {
+      relayStart(); 
     }
   }
 }
@@ -296,9 +295,8 @@ void checkResetButton() {
 
       // SHORT PRESS: Executed if duration is under long threshold and above minimum debounce
       if (duration < T_iResetLong && duration > T_iResetShort) {
-        if (sequenceActive) {
-          sequenceActive = false;
-          sequenceInit = false;
+        if (relayRunning()) {
+          relayStop();
           for (int i = 0; i < RELAY_NUMBER; i++) {
             relay[i] = LOW; // Immediately turn off all sequence relays
           }
@@ -367,7 +365,7 @@ void SerialMonitor(){
 
   // Update pipeline state parameters
   Serial.print("Sequence Status : ");
-  if (sequenceActive) {
+  if (relayRunning()) {
     Serial.print("ACTIVE | Current Relay Index: ");
     Serial.print(currentRelayIndex + 1); 
     Serial.print("/");

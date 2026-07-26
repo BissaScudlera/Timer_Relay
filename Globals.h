@@ -12,8 +12,6 @@ extern bool relay[RELAY_NUMBER];
 extern int currentRelayIndex;
 extern unsigned long relayActiveSeconds;
 
-extern bool sequenceActive;
-extern bool sequenceInit;
 
 extern byte BankA;
 extern byte BankB;

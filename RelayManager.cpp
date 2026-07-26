@@ -1,20 +1,26 @@
         #include "RelayManager.h"
         #include "Globals.h"
 
+static RelayState state = RelayState::Idle;
+
+RelayState relayState(){ return state; }
+bool relayRunning(){ return state==RelayState::Starting || state==RelayState::Running; }
+void relayStart(){ if(state==RelayState::Idle||state==RelayState::Finished) state=RelayState::Starting; }
+void relayStop(){ state=RelayState::Idle; memset(relay,LOW,sizeof(relay)); currentRelayIndex=0; relayActiveSeconds=0; }
+
         void runTimedSequence() {
   // Automated scheduling evaluation logic
-  if (!sequenceActive) {
+  if (state == RelayState::Idle) {
     if (config.dayEnableMask[now.dayOfTheWeek()]) {
       if (now.hour() == config.startHour && now.minute() == config.startMinute && now.second() == config.startSecond) {
-        sequenceActive = true;
-        sequenceInit = false; 
+        state = RelayState::Starting; 
       }
     }
   }
 
   // Run initialization routines on transition edge
-  if (sequenceActive && !sequenceInit) {
-    sequenceInit = true;
+  if (state == RelayState::Starting) {
+    state = RelayState::Running;
     memset(relay, LOW, sizeof(relay));
     relayActiveSeconds = 0;
     currentRelayIndex = 0;
@@ -27,13 +33,13 @@
       relay[currentRelayIndex] = HIGH; 
       return; 
     } else {
-      sequenceActive = false; // Graceful exit if all entries are masked out
+      state = RelayState::Finished;
       return;
     }
   }
 
   // Process standard ongoing sequencing step logic
-  if (sequenceActive && sequenceInit) {
+  if (state == RelayState::Running) {
     relayActiveSeconds++;
 
     // Process step interval transitions upon context timeout
@@ -50,8 +56,7 @@
       if (currentRelayIndex < RELAY_NUMBER) {
         relay[currentRelayIndex] = HIGH;
       } else {
-        sequenceActive = false;            
-        sequenceInit = false;
+        state = RelayState::Finished;
         currentRelayIndex = 0;
       }
     }

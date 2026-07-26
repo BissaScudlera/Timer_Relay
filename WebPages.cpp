@@ -6,6 +6,7 @@
 
 #include "Globals.h"
 #include "RTCManager.h"
+#include "RelayManager.h"
 #include "WebServer.h"
 
 // Funzioni generate nello sketch principale
@@ -33,7 +34,7 @@ void gestisciRoot()
 
     html += "<div class='card'><h2>📊 Monitoraggio Rete</h2>";
 
-    if(sequenceActive)
+    if(relayRunning())
         html += "<p class='stato attivo'>● IRRIGAZIONE IN CORSO</p>";
     else
         html += "<p class='stato spento'>○ SISTEMA IN ATTESA</p>";
@@ -51,7 +52,7 @@ void gestisciRoot()
     html += String(config.relayDuration);
     html += " s</td></tr>";
 
-    if(sequenceActive)
+    if(relayRunning())
     {
         unsigned long rimasti =
             (config.relayDuration > relayActiveSeconds) ?
@@ -115,7 +116,7 @@ void gestisciSetup()
 
     html += "<div class='sezione'>";
 
-    if(!sequenceActive)
+    if(!relayRunning())
         html += "<form action='/start' method='POST'><button type='submit' class='btn-start'>▶️ Avvia Ciclo Manuale</button></form>";
     else
         html += "<form action='/stop' method='POST'><button type='submit' class='btn-stop'>🚨 Stop Emergenza</button></form>";

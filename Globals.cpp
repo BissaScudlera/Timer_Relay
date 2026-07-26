@@ -5,9 +5,6 @@ bool relay[RELAY_NUMBER];
 int currentRelayIndex=0;
 unsigned long relayActiveSeconds=0;
 
-bool sequenceActive=false;
-bool sequenceInit=false;
-
 byte BankA=0;
 byte BankB=0;
 

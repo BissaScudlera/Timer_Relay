@@ -6,15 +6,12 @@
 
 #include "Globals.h"
 #include "RTCManager.h"
+#include "RelayManager.h"
 #include "WebServer.h"
 
 void gestisciStart()
 {
-    if (!sequenceActive)
-    {
-        sequenceActive = true;
-        sequenceInit = false;
-    }
+    relayStart();
 
     server.sendHeader("Location", "/setup");
     server.send(303);
@@ -22,13 +19,7 @@ void gestisciStart()
 
 void gestisciStop()
 {
-    sequenceActive = false;
-    sequenceInit = false;
-
-    for (int i = 0; i < RELAY_NUMBER; i++)
-    {
-        relay[i] = LOW;
-    }
+    relayStop();
 
     server.sendHeader("Location", "/setup");
     server.send(303);
