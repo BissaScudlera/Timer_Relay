@@ -3,7 +3,7 @@
 
 bool relay[RELAY_NUMBER];
 int currentRelayIndex=0;
-unsigned long relayActiveSeconds=0;
+//unsigned long relayActiveSeconds=0;
 
 byte BankA=0;
 byte BankB=0;

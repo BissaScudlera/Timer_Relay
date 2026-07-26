@@ -55,8 +55,8 @@ void gestisciRoot()
     if(relayRunning())
     {
         unsigned long rimasti =
-            (config.relayDuration > relayActiveSeconds) ?
-            config.relayDuration - relayActiveSeconds : 0;
+            (config.relayDuration > relayElapsedSeconds()) ?
+            config.relayDuration - relayElapsedSeconds() : 0;
 
         html += "<tr><td>Valvola Attiva:</td><td>";
         html += String(currentRelayIndex + 1);

@@ -10,7 +10,7 @@
 
 extern bool relay[RELAY_NUMBER];
 extern int currentRelayIndex;
-extern unsigned long relayActiveSeconds;
+//extern unsigned long relayActiveSeconds;
 
 
 extern byte BankA;

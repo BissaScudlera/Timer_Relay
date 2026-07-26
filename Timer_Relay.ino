@@ -267,45 +267,46 @@ void checkManualTrigger() {
 }
 
 void checkResetButton() {
+  static bool longPressHandled = false;
+
   int actStatus = digitalRead(iResetButton);
 
-  if (actStatus == LOW) { // Button is pressed (active low)
+  if (actStatus == LOW) {
     if (!lastResetStatus) {
       t_iReset = millis();
       lastResetStatus = true;
+      longPressHandled = false;
     }
-    
-    // Check if the button is held down past the long press threshold
-    if (lastResetStatus && (millis() - t_iReset >= T_iResetLong)) {
-      lastResetStatus = false; // Reset state to prevent continuous cyclic execution
-      
-      // ENCLOSED IN IFDEF: CONTAINS EXCLUSIVELY THE CALL TO TOGGLEWEBSERVER
-      #if defined(ARDUINO_ARCH_ESP32) || defined(ESP32)
-        toggleWebServer();
-      #endif
-      
-      // Hardware debounce wait loop for long press release
-      while(digitalRead(iResetButton) == LOW) { delay(10); }
+
+    if (!longPressHandled && (millis() - t_iReset >= T_iResetLong)) {
+      longPressHandled = true;
+      lastResetStatus = false;
+
+#if defined(ARDUINO_ARCH_ESP32) || defined(ESP32)
+      toggleWebServer();
+#endif
     }
-  } 
-  else { // Button has been released (HIGH)
+  }
+  else {
     if (lastResetStatus) {
       unsigned long duration = millis() - t_iReset;
-      lastResetStatus = false; // Reset state
+      lastResetStatus = false;
 
-      // SHORT PRESS: Executed if duration is under long threshold and above minimum debounce
       if (duration < T_iResetLong && duration > T_iResetShort) {
         if (relayRunning()) {
           relayStop();
           for (int i = 0; i < RELAY_NUMBER; i++) {
-            relay[i] = LOW; // Immediately turn off all sequence relays
+            relay[i] = LOW;
           }
           DBG_PRINT("\n[HARDWARE] Short Press: Relay sequence RESET.");
         }
       }
     }
+
+    longPressHandled = false;
   }
 }
+
 
 #if DEBUG
 void SerialMonitor(){
@@ -371,7 +372,7 @@ void SerialMonitor(){
     Serial.print("/");
     Serial.print(RELAY_NUMBER);
     Serial.print(" | Time Remaining: ");
-    Serial.print(config.relayDuration - relayActiveSeconds);
+    Serial.print(relayRemainingSeconds());
     Serial.println("s");
   } else {
     Serial.println("IDLE (Waiting for trigger)");
