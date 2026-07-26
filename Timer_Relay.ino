@@ -6,6 +6,7 @@
 **********************************************/
 #include <Arduino.h>
 #include "Version.h"
+#include "Scheduler.h"
 #include "Globals.h"
 #include "DeviceStatus.h"
 #include "RTCManager.h"

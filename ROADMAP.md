@@ -7,8 +7,9 @@
 - [ ] 1.1.2 RTC Manager
 - [ ] 1.1.3 RTC Fault Tolerance
 - [ ] 1.1.4 I²C Fault Tolerance
-- [ ] 1.1.5 WebServer Hardening
-- [ ] 1.1.6 Diagnostics
+- [ ] 1.1.5 replace timers with scheduler
+- [ ] 1.1.6 WebServer Hardening
+- [ ] 1.1.7 Diagnostics
 
 ## Phase 2 - Modularization
 

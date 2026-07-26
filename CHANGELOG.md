@@ -38,3 +38,14 @@ Il progetto segue una roadmap incrementale:
 - Versioning firmware
 - Informazioni build
 
+## [1.1.3] - 2026-07-26
+
+### Added
+- Cache centralizzata della data/ora (`cachedNow`).
+
+### Changed
+- Tutte le letture del RTC passano attraverso `rtcUpdate()` e `rtcNow()`.
+
+### Fixed
+- Eliminata la possibilità di letture multiple incoerenti del DS3231 nello stesso ciclo.
+

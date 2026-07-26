@@ -1,0 +1,1 @@
+rimuovere le definizioni multipiattaforma, il prgetto è definitivamente solo per esp32
