@@ -1,6 +1,8 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
 
+#include "TimeBase.h"
+
 #include <Arduino.h>
 
 struct TaskTimer

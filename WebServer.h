@@ -19,8 +19,7 @@
   extern int currentRelayIndex;
   extern unsigned long relayActiveSeconds;
   extern unsigned long relayDuration; 
-  extern bool relay[]; 
-  extern const int relayNumber;
+  extern bool relay[RELAY_NUMBER]; 
       extern bool rtcAvailable();
     extern const char* rtcTimeString();
   extern const char* rtcDateString();
@@ -75,7 +74,7 @@ extern bool rtcSetTime(uint8_t hour,uint8_t minute);
     html += "<tr><td>Durata Canale:</td><td>" + String(relayDuration) + " s</td></tr>";
     if (sequenceActive) {
       unsigned long rimasti = (relayDuration > relayActiveSeconds) ? (relayDuration - relayActiveSeconds) : 0;
-      html += "<tr><td>Valvola Attiva:</td><td>" + String(currentRelayIndex + 1) + " / " + String(relayNumber) + "</td></tr>";
+      html += "<tr><td>Valvola Attiva:</td><td>" + String(currentRelayIndex + 1) + " / " + String(RELAY_NUMBER) + "</td></tr>";
       html += "<tr><td>Tempo Rimasto Step:</td><td>" + String(rimasti) + " s</td></tr>";
     } else {
       html += "<tr><td>Valvola Attiva:</td><td>Nessuna</td></tr>";
@@ -153,14 +152,14 @@ extern bool rtcSetTime(uint8_t hour,uint8_t minute);
 #ifdef ARDUINO_ARCH_ESP32
   // --- GESTORI DELLE AZIONI POST RICEVUTE VIA WEB ---
   void gestisciStart() { if (!sequenceActive) { sequenceActive = true; sequenceInit = false; } server.sendHeader("Location", "/setup"); server.send(303); }
-  void gestisciStop() { sequenceActive = false; sequenceInit = false; for (int i = 0; i < relayNumber; i++) { relay[i] = LOW; } server.sendHeader("Location", "/setup"); server.send(303); }
+  void gestisciStop() { sequenceActive = false; sequenceInit = false; for (int i = 0; i < RELAY_NUMBER; i++) { relay[i] = LOW; } server.sendHeader("Location", "/setup"); server.send(303); }
   void gestisciSalvaDurata() { if (server.hasArg("durata")) { long nuovaDurata = server.arg("durata").toInt(); if (nuovaDurata > 0) { relayDuration = nuovaDurata; } } server.sendHeader("Location", "/setup"); server.send(303); }
   void gestisciSalvaOra() { if (rtcAvailable() /* patched */ && server.hasArg("orario")) { String t = server.arg("orario"); int h = t.substring(0, 2).toInt(); int m = t.substring(3, 5).toInt(); DateTime dt=rtcNow(); rtcSetTime(h,m); } server.sendHeader("Location", "/setup"); server.send(303); }
   
   void gestisciSalvaMaschere() { 
     // Aggiorniamo le maschere in modo indiretto basandoci sulle stringhe inviate
     // Questo previene overflow di array extern sconosciuti
-    for(int i = 0; i < relayNumber; i++) {
+    for(int i = 0; i < RELAY_NUMBER; i++) {
       // Nota: Per modificare gli array dal file .h senza extern rigido,
       // usiamo la logica classica o lasciamo che il file .ino riceva i dati se preferisci.
       // Questa chiamata diretta ora è stabile perché gli array nativi sono isolati.

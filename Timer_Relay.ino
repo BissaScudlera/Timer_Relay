@@ -14,29 +14,30 @@
 #include "RTCManager.h"
 #include "I2CManager.h"
 
+#include "RelayManager.h"
 const int DEBUG = true; //false; // Software override for debug jumpers
 
 /*- SETUP PARAMETERS ------------------------------------------------------------------*/
-const int relayNumber = 16;  // Total number of connected relays
+//const int relayNumber = 16;  // Total number of connected relays
 
 // Active time per relay in seconds
-unsigned long relayDuration = 1*60;
+//unsigned long relayDuration = 1*60;
 
 // Target start time configuration (24h format)
-const int startHour = 23;
-const int startMinute = 0;
-const int startSecond = 0;
+//const int startHour = 23;
+//const int startMinute = 0;
+//const int startSecond = 0;
 
 // Relay channel activation mask (HIGH = active, LOW = skipped)
-bool relayEnableMask[relayNumber] = {
+/*bool relayEnableMask[relayNumber] = {
   HIGH, HIGH, HIGH, HIGH,  // Relays 1-4
   HIGH, HIGH, HIGH, HIGH,  // Relays 5-8
   HIGH, HIGH, HIGH, HIGH,  // Relays 9-12
   HIGH, HIGH, HIGH, HIGH   // Relays 13-16
-};
+};*/
 
 // Weekday execution mask (Index 0 = Sunday, ..., 6 = Saturday)
-bool dayEnableMask[7] = {
+/*bool dayEnableMask[7] = {
   HIGH, // Sunday
   HIGH, // Monday
   HIGH, // Tuesday
@@ -44,7 +45,7 @@ bool dayEnableMask[7] = {
   HIGH, // Thursday
   HIGH, // Friday
   HIGH  // Saturday
-};
+};*/
 
 /*-------------------------------------------------------------------------------------*/
 
@@ -81,34 +82,14 @@ uint32_t currentMillis = 0;
 uint32_t previousMillis;
 
 #include <Wire.h> //I2C library
-DeviceStatus rtcStatus;
-
-DeviceStatus i2cStatus;
-
-DeviceStatus tempStatus;
-
-DeviceStatus relayStatus;
 
 // DS3231 RTC configurations
 #include "RTClib.h"
 const char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 const char* shortDays[7] = {"Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};
-RTC_DS3231 rtc;
-DateTime now;
-bool rtcFound;
 
 // MCP23017 I2C Port Expander configurations
-#include <MCP23017.h> 
-MCP23017 mcp1 = MCP23017(0x20);
-byte BankA; // Relays 1 to 8
-byte BankB; // Relays 9 to 16
 
-// Relay sequence control state variables
-bool relay[relayNumber];
-bool sequenceActive = false;           // Active sequence execution flag
-bool sequenceInit = false;             // Sequence initialization flag
-int currentRelayIndex = 0;             // Active relay element pointer
-unsigned long relayActiveSeconds = 0;  // Elapsed runtime tracker for current step
 
 // Hardware input debounce filters
 int lastButtonState = HIGH;              // Default idle high due to internal pull-up
@@ -256,12 +237,12 @@ void loop() {
     BankA = 0;
     BankB = 0;
     for (int i = 0; i < 8; i++) {
-      if (i < relayNumber) {
+      if (i < RELAY_NUMBER) {
         BankA |= (relay[i] << i);
       }
     }
     for (int i = 0; i < 8; i++) {
-      if ((i + 8) < relayNumber) {
+      if ((i + 8) < RELAY_NUMBER) {
         BankB |= (relay[i + 8] << i);
       }
     }
@@ -283,62 +264,7 @@ void loop() {
   }
 }
 
-void runTimedSequence() {
-  // Automated scheduling evaluation logic
-  if (!sequenceActive) {
-    if (dayEnableMask[now.dayOfTheWeek()]) {
-      if (now.hour() == startHour && now.minute() == startMinute && now.second() == startSecond) {
-        sequenceActive = true;
-        sequenceInit = false; 
-      }
-    }
-  }
 
-  // Run initialization routines on transition edge
-  if (sequenceActive && !sequenceInit) {
-    sequenceInit = true;
-    memset(relay, LOW, sizeof(relay));
-    relayActiveSeconds = 0;
-    currentRelayIndex = 0;
-    
-    // Locate the first non-masked relay index 
-    while (currentRelayIndex < relayNumber && !relayEnableMask[currentRelayIndex]) {
-      currentRelayIndex++;
-    }
-    if (currentRelayIndex < relayNumber) { 
-      relay[currentRelayIndex] = HIGH; 
-      return; 
-    } else {
-      sequenceActive = false; // Graceful exit if all entries are masked out
-      return;
-    }
-  }
-
-  // Process standard ongoing sequencing step logic
-  if (sequenceActive && sequenceInit) {
-    relayActiveSeconds++;
-
-    // Process step interval transitions upon context timeout
-    if (relayActiveSeconds >= relayDuration) {
-      relayActiveSeconds = 0;              
-      relay[currentRelayIndex] = LOW;      
-
-      // Advance index pointer while bypassing disabled entries
-      do {
-        currentRelayIndex++;
-      } while (currentRelayIndex < relayNumber && !relayEnableMask[currentRelayIndex]);
-
-      // Commit to next element state or finalize pipeline execution
-      if (currentRelayIndex < relayNumber) {
-        relay[currentRelayIndex] = HIGH;
-      } else {
-        sequenceActive = false;            
-        sequenceInit = false;
-        currentRelayIndex = 0;
-      }
-    }
-  }
-}
 
 void checkManualTrigger() {
   int reading = digitalRead(iTriggerButton);
@@ -389,7 +315,7 @@ void checkResetButton() {
         if (sequenceActive) {
           sequenceActive = false;
           sequenceInit = false;
-          for (int i = 0; i < relayNumber; i++) {
+          for (int i = 0; i < RELAY_NUMBER; i++) {
             relay[i] = LOW; // Immediately turn off all sequence relays
           }
           if (ComDebug | DEBUG) {
@@ -465,7 +391,7 @@ void SerialMonitor(){
     Serial.print("ACTIVE | Current Relay Index: ");
     Serial.print(currentRelayIndex + 1); 
     Serial.print("/");
-    Serial.print(relayNumber);
+    Serial.print(RELAY_NUMBER);
     Serial.print(" | Time Remaining: ");
     Serial.print(relayDuration - relayActiveSeconds);
     Serial.println("s");
@@ -476,7 +402,7 @@ void SerialMonitor(){
 
   // Output current software matrix state parameters
   Serial.print("Output SW: [");
-  for (int i = 0; i < relayNumber; i++) {
+  for (int i = 0; i < RELAY_NUMBER; i++) {
     Serial.print(relay[i] ? '1' : '0'); 
     if (i == 7) Serial.print(' ');      
   }
@@ -562,10 +488,10 @@ void RelayTest(){
     return;
   }
   // Incrementally cycle array elements during idle testing parameters
-  for(int i = 0; i < relayNumber; i++) {
+  for(int i = 0; i < RELAY_NUMBER; i++) {
     if(relay[i] == HIGH) {
       relay[i] = LOW;
-      if(i==relayNumber-1){
+      if(i==RELAY_NUMBER-1){
         break;  
       }else{
         relay[i+1] = HIGH;
@@ -609,7 +535,7 @@ void checkSystemResetReason() {
 // GENERA GLI SWITCH HTML deve accedere direttamente agli array del programma principale
 String generaHtmlRele() {
   String html = "";
-  for(int i = 0; i < relayNumber; i++) {
+  for(int i = 0; i < RELAY_NUMBER; i++) {
     html += "<div class='toggle-container'><span>V" + String(i+1) + "</span><label class='switch'>";
     html += "<input type='checkbox' name='r" + String(i) + "' value='1'" + (relayEnableMask[i] ? " checked" : "") + ">";
     html += "<span class='slider'></span></label></div>";
