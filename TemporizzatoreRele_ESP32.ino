@@ -142,7 +142,11 @@ void setup() {
   // Initialize hardware serial console
   if(ComDebug | DEBUG){
     Serial.begin(SERIAL_BAUD);
-    while (!Serial) { delay(50); } // Hold execution until terminal connects
+    // Hold execution until terminal connects
+   uint32_t serialStart = millis();
+    while (!Serial && (millis() - serialStart < 2000)) {
+    yield();
+    }
     //Serial.print("\n\x1B[H"\n); // Clear screen terminal escape sequence
     checkSystemResetReason();
     Serial.print("Debug flags:");
@@ -202,7 +206,7 @@ void setup() {
   }
 }
 void loop() {
-  delay(10); //Prevent ESP32 watchdog triggers by yielding processor time to background routines
+  yield();; //Prevent ESP32 watchdog triggers by yielding processor time to background routines
   
   #ifdef WEB_SERVER_H
     serverLoop();
