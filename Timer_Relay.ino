@@ -2,11 +2,12 @@
 /*********************************************
  Relay Timer
  V 0.9 (Multi-Architecture Update Nano/ESP32)
- Jack and Gemini
+ Jack, Gemini and ChatGPT
 **********************************************/
 #include <Arduino.h>
 #include "Version.h"
 #include "Globals.h"
+#include "DeviceStatus.h"
 
 const int DEBUG = true; //false; // Software override for debug jumpers
 
