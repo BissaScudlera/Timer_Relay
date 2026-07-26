@@ -59,20 +59,21 @@ void gestisciSalvaOra()
 
 void gestisciSalvaMaschere()
 {
-    /*
-        Qui verrà implementato il ConfigManager.
-
-        Per ora manteniamo esattamente il comportamento
-        originale senza modificare la logica.
-    */
-
+    // Relè
     for (int i = 0; i < RELAY_NUMBER; i++)
     {
-        // placeholder
+        String nome = "r" + String(i);
+        config.relayEnableMask[i] = server.hasArg(nome);
+    }
+
+    // Giorni
+    for (int i = 0; i < 7; i++)
+    {
+        String nome = "d" + String(i);
+        config.dayEnableMask[i] = server.hasArg(nome);
     }
 
     server.sendHeader("Location", "/setup");
     server.send(303);
 }
-
 #endif
