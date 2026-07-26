@@ -22,9 +22,10 @@
   extern unsigned long relayDuration; 
   extern bool relay[]; 
   extern const int relayNumber;
-  extern DateTime now;
-  extern RTC_DS3231 rtc;
-  extern bool rtcFound;
+      extern bool rtcAvailable();
+  extern DateTime rtcNow();
+  extern const char* rtcTimeString();
+  extern const char* rtcDateString();
   extern int ErrState;
   extern const int iResetButton; 
   
@@ -69,10 +70,8 @@
     else { html += "<p class='stato spento'>○ SISTEMA IN ATTESA</p>"; }
 
     html += "<table class='info-table'>";
-    if (rtcFound) {
-      char oraStr[16]; 
-      snprintf(oraStr, sizeof(oraStr), "%02d:%02d:%02d", now.hour(), now.minute(), now.second());
-      html += "<tr><td>Orario RTC:</td><td>" + String(oraStr) + "</td></tr>";
+    if (rtcAvailable() /* patched */) {
+      html += "<tr><td>Orario RTC:</td><td>" + String(rtcTimeString()) + "</td></tr";
     }
     html += "<tr><td>Durata Canale:</td><td>" + String(relayDuration) + " s</td></tr>";
     if (sequenceActive) {
@@ -123,9 +122,10 @@
     html += "<button type='submit' class='btn-save'>Salva Durata</button>";
     html += "</form></div>";
 
-    if (rtcFound) {
-      char oraAttuale[16]; 
-      snprintf(oraAttuale, sizeof(oraAttuale), "%02d:%02d", now.hour(), now.minute());
+    if (rtcAvailable() /* patched */) {
+      DateTime dt = rtcNow();
+      char oraAttuale[6];
+      snprintf(oraAttuale,sizeof(oraAttuale),"%02d:%02d",dt.hour(),dt.minute());
       html += "<div class='sezione'><h3>📅 Aggiorna Ora Orologio</h3>";
       html += "<form action='/salva-ora' method='POST'>";
       html += "<input type='time' name='orario' value='" + String(oraAttuale) + "' required>";
@@ -146,7 +146,7 @@
     html += "</div>";
     html += "<button type='submit' class='btn-save'>Salva Interruttori</button></form></div>";
     
-    html += "<div class='sezione'><a href='/'><button class='btn-back'>↩ Torna al Monitoraggio</button></a></div>";
+    html += "<div class='sezione'><a href='/'><button class='btn-back'>Torna al Monitoraggio</button></a></div>";
     html += "</div></body></html>";
     server.send(200, "text/html", html);
   }
@@ -156,7 +156,7 @@
   void gestisciStart() { if (!sequenceActive) { sequenceActive = true; sequenceInit = false; } server.sendHeader("Location", "/setup"); server.send(303); }
   void gestisciStop() { sequenceActive = false; sequenceInit = false; for (int i = 0; i < relayNumber; i++) { relay[i] = LOW; } server.sendHeader("Location", "/setup"); server.send(303); }
   void gestisciSalvaDurata() { if (server.hasArg("durata")) { long nuovaDurata = server.arg("durata").toInt(); if (nuovaDurata > 0) { relayDuration = nuovaDurata; } } server.sendHeader("Location", "/setup"); server.send(303); }
-  void gestisciSalvaOra() { if (rtcFound && server.hasArg("orario")) { String t = server.arg("orario"); int h = t.substring(0, 2).toInt(); int m = t.substring(3, 5).toInt(); rtc.adjust(DateTime(now.year(), now.month(), now.day(), h, m, 0)); } server.sendHeader("Location", "/setup"); server.send(303); }
+  void gestisciSalvaOra() { if (rtcAvailable() /* patched */ && server.hasArg("orario")) { String t = server.arg("orario"); int h = t.substring(0, 2).toInt(); int m = t.substring(3, 5).toInt(); DateTime dt=rtcNow(); rtc.adjust(DateTime(dt.year(), dt.month(), dt.day(), h, m, 0)); } server.sendHeader("Location", "/setup"); server.send(303); }
   
   void gestisciSalvaMaschere() { 
     // Aggiorniamo le maschere in modo indiretto basandoci sulle stringhe inviate

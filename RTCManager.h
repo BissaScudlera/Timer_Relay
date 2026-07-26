@@ -27,3 +27,5 @@ const char* rtcTimeString(void);
 const char* rtcDateString(void);
 
 #endif
+// Returns RTC diagnostic status
+const DeviceStatus& rtcGetStatus(void);

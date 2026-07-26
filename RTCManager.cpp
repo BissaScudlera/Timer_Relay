@@ -7,6 +7,8 @@ static DateTime cachedNow;
 static char timeBuffer[9];
 static char dateBuffer[11];
 
+static bool rtcReadCached(DateTime &value);
+
 bool rtcInit(void)
 {
     rtcStatus.lastCheck = millis();
@@ -25,7 +27,10 @@ bool rtcInit(void)
     rtcStatus.available = true;
     rtcStatus.lastOk = rtcStatus.lastCheck;
 
-    cachedNow = rtc.now();
+    if (!rtcReadCached(cachedNow))
+    {
+        return false;
+    }
 
     return true;
 }
@@ -48,11 +53,11 @@ bool rtcRecover(void)
         return false;
     }
 
-    cachedNow = rtc.now();
+    if (!rtcReadCached(cachedNow))
+    {
+        return false;
+    }
 
-    rtcStatus.available = true;
-    rtcStatus.state = DeviceState::OK;
-    rtcStatus.lastError = 0;
     rtcStatus.lastOk = millis();
 
     return true;
@@ -76,13 +81,10 @@ bool rtcUpdate(void)
     return false;
 }
 
-    rtcStatus.available = true;
-    rtcStatus.state = DeviceState::OK;
-    rtcStatus.lastError = 0;
-
-// TODO v1.1.8
-// Lettura protetta con gestione recovery
-    cachedNow = rtc.now();
+    if (!rtcReadCached(cachedNow))
+    {
+        return false;
+    }
 
     rtcStatus.lastOk = rtcStatus.lastCheck;
 
@@ -133,4 +135,33 @@ const char* rtcDateString(void)
         cachedNow.year());
 
     return dateBuffer;
+}
+
+static constexpr uint8_t RTC_I2C_ADDRESS = 0x68;
+
+static bool rtcReadCached(DateTime &value)
+{
+    if (!i2cDevicePresent(RTC_I2C_ADDRESS))
+    {
+        if (rtcStatus.available)
+        {
+            rtcStatus.errorCount++;
+        }
+        rtcStatus.available = false;
+        rtcStatus.state = DeviceState::ERROR;
+        rtcStatus.lastError = i2cLastError();
+        return false;
+    }
+
+    value = rtc.now();
+    rtcStatus.available = true;
+    rtcStatus.state = DeviceState::OK;
+    rtcStatus.lastError = 0;
+    return true;
+}
+
+
+const DeviceStatus& rtcGetStatus(void)
+{
+    return rtcStatus;
 }
