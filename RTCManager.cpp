@@ -30,7 +30,15 @@ bool rtcInit(void)
 
 bool rtcUpdate(void)
 {
-    return rtcStatus.available;
+    if (!rtcStatus.available)
+        return false;
+
+    cachedNow = rtc.now();
+
+    rtcStatus.lastCheck = millis();
+    rtcStatus.lastOk = rtcStatus.lastCheck;
+
+    return true;
 }
 
 bool rtcAvailable(void)
@@ -40,11 +48,6 @@ bool rtcAvailable(void)
 
 DateTime rtcNow(void)
 {
-    if (rtcStatus.available)
-    {
-        cachedNow = rtc.now();
-    }
-
     return cachedNow;
 }
 
