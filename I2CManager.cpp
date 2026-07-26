@@ -4,7 +4,7 @@ static uint8_t lastError = 0;
 
 bool i2cBegin()
 {
-    Wire.begin(SDA_PIN, SCL_PIN);
+    Wire.begin(21, 22);
     lastError = 0;
     return true;
 }

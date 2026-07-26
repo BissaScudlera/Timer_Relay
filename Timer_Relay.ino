@@ -6,6 +6,7 @@
 **********************************************/
 #include <Arduino.h>
 #include "Version.h"
+#include "TimeBase.h"
 #include "Scheduler.h"
 #include "Globals.h"
 #include "DeviceStatus.h"
@@ -75,8 +76,8 @@ int OutDebug = false;
 int MsgNum;
 
 // Subroutine execution timers
-unsigned long currentMillis = 0;  
-unsigned long previousMillis;
+uint32_t currentMillis = 0;  
+uint32_t previousMillis;
 
 #include <Wire.h> //I2C library
 DeviceStatus rtcStatus;
@@ -210,13 +211,13 @@ void setup() {
   }
 }
 void loop() {
+  currentMillis = millis();
   yield();; //Prevent ESP32 watchdog triggers by yielding processor time to background routines
   
   #ifdef WEB_SERVER_H
     serverLoop();
   #endif
 
-  currentMillis = millis();
   checkManualTrigger();
   checkResetButton();
 

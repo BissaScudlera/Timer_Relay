@@ -11,7 +11,7 @@ struct TaskTimer
 
 inline bool taskExpired(TaskTimer &task)
 {
-    uint32_t now = millis();
+    uint32_t now = nowMs();
 
     if ((uint32_t)(now - task.lastRunMs) >= task.periodMs)
     {
@@ -24,22 +24,22 @@ inline bool taskExpired(TaskTimer &task)
 
 inline void taskReset(TaskTimer &task)
 {
-    task.lastRunMs = millis();
+    task.lastRunMs = nowMs();
 }
 
 inline void taskForce(TaskTimer &task)
 {
-    task.lastRunMs = millis() - task.periodMs;
+    task.lastRunMs = nowMs() - task.periodMs;
 }
 
 inline uint32_t taskElapsed(const TaskTimer &task)
 {
-    return millis() - task.lastRunMs;
+    return nowMs() - task.lastRunMs;
 }
 
 inline uint32_t taskRemaining(const TaskTimer &task)
 {
-    uint32_t elapsed = millis() - task.lastRunMs;
+    uint32_t elapsed = nowMs() - task.lastRunMs;
 
     if (elapsed >= task.periodMs)
         return 0;
