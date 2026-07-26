@@ -1,11 +1,28 @@
-bool rtcInit();
+#ifndef RTCMANAGER_H
+#define RTCMANAGER_H
 
-bool rtcUpdate();
+#include <Arduino.h>
+#include <RTClib.h>
+#include "DeviceStatus.h"
 
-bool rtcAvailable();
+// Oggetti definiti nel file principale
+extern RTC_DS3231 rtc;
+extern DeviceStatus rtcStatus;
 
-DateTime rtcNow();
+// Inizializzazione RTC
+bool rtcInit(void);
 
-const char* rtcTimeString();
+// Aggiornamento periodico (placeholder)
+bool rtcUpdate(void);
 
-const char* rtcDateString();
+// Stato RTC
+bool rtcAvailable(void);
+
+// Restituisce l'ultima data/ora valida
+DateTime rtcNow(void);
+
+// Stringhe formattate
+const char* rtcTimeString(void);
+const char* rtcDateString(void);
+
+#endif

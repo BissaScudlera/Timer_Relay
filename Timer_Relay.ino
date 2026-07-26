@@ -8,6 +8,7 @@
 #include "Version.h"
 #include "Globals.h"
 #include "DeviceStatus.h"
+#include "RTCManager.h"
 
 const int DEBUG = true; //false; // Software override for debug jumpers
 
@@ -180,7 +181,7 @@ void setup() {
   }
   
   // Validate real-time clock operational status
-  rtcFound = rtc.begin();
+  rtcFound = rtcInit();
   if (!rtcFound) {
     DeviceAlive(0x68, "RTC");
     if (ComDebug | DEBUG) {
@@ -238,7 +239,7 @@ void loop() {
 
     // Query active clock timestamp from hardware rtc element
     if ( rtcFound & DeviceAlive(0x68, "RTC") ){
-      now = rtc.now();
+      now = rtcNow();
     }
 
     // Evaluate automated sequence pipeline cycles
