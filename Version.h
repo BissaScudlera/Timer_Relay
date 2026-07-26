@@ -11,4 +11,6 @@
 
 #define FW_STRING  "1.1.0"
 
+const char* firmwareVersion();
+
 #endif
