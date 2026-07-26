@@ -25,9 +25,35 @@ bool rtcInit(void)
     rtcStatus.available = true;
     rtcStatus.lastOk = rtcStatus.lastCheck;
 
-// TODO v1.1.8
-// Lettura protetta con gestione recovery
     cachedNow = rtc.now();
+
+    return true;
+}
+
+bool rtcRecover(void)
+{
+    if (rtcStatus.available)
+    {
+        return true;
+    }
+
+    if (!i2cDevicePresent(0x68))
+    {
+        return false;
+    }
+
+    if (!rtc.begin())
+    {
+        rtcStatus.lastError = -1;
+        return false;
+    }
+
+    cachedNow = rtc.now();
+
+    rtcStatus.available = true;
+    rtcStatus.state = DeviceState::OK;
+    rtcStatus.lastError = 0;
+    rtcStatus.lastOk = millis();
 
     return true;
 }

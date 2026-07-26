@@ -4,3 +4,4 @@ TaskTimer sensorTask     = {1000, 0};
 TaskTimer diagTask       = {10000, 0};
 TaskTimer displayTask    = {250, 0};
 TaskTimer eepromTask     = {1000, 0};
+TaskTimer rtcRecoveryTask = {5000, 0};

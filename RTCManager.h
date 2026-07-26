@@ -11,6 +11,7 @@ extern DeviceStatus rtcStatus;
 
 // Inizializzazione RTC
 bool rtcInit(void);
+bool rtcRecover(void);
 
 // Aggiornamento periodico (placeholder)
 bool rtcUpdate(void);

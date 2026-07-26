@@ -223,6 +223,13 @@ void loop() {
 
   // Primary execution block triggered exactly once per second
   if (currentMillis - previousMillis >= 1000) {
+    if (!rtcAvailable())
+    {
+      if (taskExpired(rtcRecoveryTask))
+      {
+        rtcRecover();
+      }
+    }
     rtcUpdate();
     previousMillis = currentMillis; 
     // Handle I2C peripheral hardware bus errors (AVR architecture only)
