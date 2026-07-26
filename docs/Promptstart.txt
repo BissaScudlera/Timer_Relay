@@ -1,48 +1,7 @@
 Agisci come un programmatore esperto di sistemi embedded, firmware Arduino, architetture C++ e microcontrollori ESP32. 
 Ho ristrutturato completamente il progetto del mio temporizzatore/centralina per irrigazione. Trovi l'intero ecosistema sul ramo 'develop' del mio repository pubblico: https://github.com/BissaScudlera/Timer_Relay/tree/develop
 
-Per consentirti di analizzare i flussi, le dipendenze hardware e coordinare le modifiche senza creare bug di compilazione, ti allego qui sotto il codice sorgente completo di tutti i file attivi del mio firmware. Leggili con attenzione:
-
---- FILE 1: Globals.h ---
-https://raw.githubusercontent.com/BissaScudlera/Timer_Relay/refs/heads/develop/Globals.h
-
---- FILE 2: TimeBase.h ---
-https://raw.githubusercontent.com/BissaScudlera/Timer_Relay/refs/heads/develop/TimeBase.h
-
---- FILE 3: Scheduler.h ---
-https://raw.githubusercontent.com/BissaScudlera/Timer_Relay/refs/heads/develop/Scheduler.h
-
---- FILE 4: DeviceStatus.h ---
-https://raw.githubusercontent.com/BissaScudlera/Timer_Relay/refs/heads/develop/DeviceStatus.h
-
---- FILE 5: Diagnostics.h ---
-https://raw.githubusercontent.com/BissaScudlera/Timer_Relay/refs/heads/develop/Diagnostics.h
-
---- FILE 6: I2CManager.h ---
-https://raw.githubusercontent.com/BissaScudlera/Timer_Relay/refs/heads/develop/I2CManager.h
-
---- FILE 7: I2CManager.cpp ---
-https://raw.githubusercontent.com/BissaScudlera/Timer_Relay/refs/heads/develop/I2CManager.cpp
-
---- FILE 8: RTCManager.h ---
-https://raw.githubusercontent.com/BissaScudlera/Timer_Relay/refs/heads/develop/RTCManager.h
-
---- FILE 9: RTCManager.cpp ---
-https://raw.githubusercontent.com/BissaScudlera/Timer_Relay/refs/heads/develop/RTCManager.cpp
-
---- FILE 10: Version.h ---
-https://raw.githubusercontent.com/BissaScudlera/Timer_Relay/refs/heads/develop/Version.h
-
---- FILE 11: Version.cpp ---
-https://raw.githubusercontent.com/BissaScudlera/Timer_Relay/refs/heads/develop/Version.cpp
-
---- FILE 12: WebServer.h ---
-https://raw.githubusercontent.com/BissaScudlera/Timer_Relay/refs/heads/develop/WebServer.h
-
---- FILE 13: Timer_Relay.ino ---
-https://raw.githubusercontent.com/BissaScudlera/Timer_Relay/refs/heads/develop/Time_Relay.ino
-
---- Fine dei file sorgente ---
+Per consentirti di analizzare i flussi, le dipendenze hardware e coordinare le modifiche senza creare bug di compilazione, ti allego qui sotto il codice sorgente completo di tutti i file attivi del mio firmware. Leggili con attenzione.
 
 Ho bisogno che tu assimili questa struttura modulare. Segui rigorosamente queste direttive per ogni modifica futura:
 1. I commenti nei file  devono essere scritti in INGLESE.

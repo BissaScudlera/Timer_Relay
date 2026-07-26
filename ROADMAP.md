@@ -294,24 +294,6 @@ Ring buffer
 
 ---
 
-# FASE 5 - Nuove funzioni
-
-OTA
-
-MQTT
-
-REST API
-
-JSON
-
-NTP
-
-Cronologia eventi
-
-Backup configurazione
-
----
-
 # Regole di sviluppo
 
 ✔ Una patch modifica massimo 2 file esistenti.

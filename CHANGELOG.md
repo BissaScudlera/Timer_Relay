@@ -1,3 +1,10 @@
+## [1.2.9] - 2026-07-26
+
+### Changed
+- Planned integration of Scheduler into the main loop.
+- Reserved patch identifier for scheduler migration.
+- No functional changes introduced in this patch.
+
 
 
 ## [1.2.8] - 2026-07-26
