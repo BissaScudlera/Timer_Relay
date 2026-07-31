@@ -8,6 +8,7 @@
 **********************************************/
 #include <Arduino.h>
 #include "Version.h"
+#include "ConfigManager.h"  //SETUP PARAMETERS
 #include "TimeBase.h"
 #include "Scheduler.h"
 #include "Globals.h"
@@ -17,42 +18,10 @@
 
 #include "RelayManager.h"
 
-/*- SETUP PARAMETERS ------------------------------------------------------------------*/
-//const int relayNumber = 16;  // Total number of connected relays
-
-// Active time per relay in seconds
-//unsigned long relayDuration = 1*60;
-
-// Target start time configuration (24h format)
-//const int startHour = 23;
-//const int startMinute = 0;
-//const int startSecond = 0;
-
-// Relay channel activation mask (HIGH = active, LOW = skipped)
-/*bool relayEnableMask[relayNumber] = {
-  HIGH, HIGH, HIGH, HIGH,  // Relays 1-4
-  HIGH, HIGH, HIGH, HIGH,  // Relays 5-8
-  HIGH, HIGH, HIGH, HIGH,  // Relays 9-12
-  HIGH, HIGH, HIGH, HIGH   // Relays 13-16
-};*/
-
-// Weekday execution mask (Index 0 = Sunday, ..., 6 = Saturday)
-/*bool dayEnableMask[7] = {
-  HIGH, // Sunday
-  HIGH, // Monday
-  HIGH, // Tuesday
-  HIGH, // Wednesday
-  HIGH, // Thursday
-  HIGH, // Friday
-  HIGH  // Saturday
-};*/
-
-/*-------------------------------------------------------------------------------------*/
-
 // Architecture-specific I/O and communication settings----------------------------------
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP32)
   // ESP32 DevKit V1 configuration
-  #include "WebServer.h"
+  #include "HttpServer.h"
   const int iTriggerButton = 4;  // PIN D2: Manual Sequence Start, debounced push button
   const int iResetButton   = 5;  // PIN D5: stops active sequence, long press to toggle wifi
   const int oLedDebug      = LED_BUILTIN; // Uses ESP32 native built-in LED (GPIO 2)

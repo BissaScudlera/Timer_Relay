@@ -8,7 +8,7 @@
 #include "RTCManager.h"
 #include "RelayManager.h"
 #include "Diagnostics.h"
-#include "WebServer.h"
+#include "HttpServer.h"
 
 static String paginaInizio(const String& titolo)
 {
@@ -236,7 +236,7 @@ void gestisciConfigurazione()
     html += String(config.startMinute);
     html += "'>";
 
-    html += "<h3>Durata step</h3>";
+    html += "<h3>Durata step [s]</h3>";
     html += "<input name='durata' value='";
     html += String(config.relayDuration);
     html += "'>";

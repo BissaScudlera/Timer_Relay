@@ -1,4 +1,4 @@
-#include "WebServer.h"
+#include "HttpServer.h"
 
 #ifdef ARDUINO_ARCH_ESP32
 
@@ -6,8 +6,9 @@
 // Variabili globali
 //------------------------------------------------------------
 
-const char* ssid = "irrigazione";
-const char* password = "michelone";
+//Wifi Configuration
+const char* ssid = "ESP32" ;
+const char* password = "12345678" ;
 
 WebServer server(80);
 

@@ -1,15 +1,24 @@
-# OS generated files #
-######################
+# .gitignore
+
+# Arduino build output (if generated inside the project)
+build/
+
+# Temporary files
+*.tmp
+*.bak
+*.orig
+*.swp
+
+# OS files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
+# Local configuration (if ever created)
+secrets.h
+credentials.h
+wifi_config.h
 
 
-
-
+# Local folders
+/utils
 /interazioni_IA
