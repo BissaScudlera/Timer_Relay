@@ -160,13 +160,13 @@ void gestisciRoot()
     html += ":";
     if(config.startMinute < 10) html += "0";
     html += String(config.startMinute);
-    html += "<br>Durata step: ";
-    html += String(formatCountTime(config.relayDuration));
-    html += "<br>";
-	html += "<br>Durata programma: ";
-	html += formatCountTime(relayProgramDurationSeconds());
     html += "<br>Giorni: ";
     html += giorniAbilitati();
+    html += "<br>";
+    html += "<br>Durata step: ";
+    html += String(formatCountTime(config.relayDuration));
+	html += "<br>Durata programma: ";
+	html += formatCountTime(relayProgramDurationSeconds());
     html += "</div>";
 
     html += "</body></html>";
