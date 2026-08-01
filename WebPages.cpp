@@ -129,6 +129,14 @@ void gestisciRoot()
     html += relayRunning() ? "ATTIVA" : "FERMA";
     html += "</div>";
 
+    html += "<div class='card'><h2>Uscite attive</h2>";
+    html += listaUsciteAttive();
+	if (relayRunning()){
+		html += "<br>Tempo rimanente: ";
+		html += String(formatCountTime(relayRemainingSeconds()));
+	}
+    html += "</div>";
+
     //html += "<div class='card'><h2>Ora / Giorno / Data</h2>";
 	html += "<div class='card'><h2>Orologio</h2>";
     if(rtcGetStatus().available)
@@ -154,17 +162,10 @@ void gestisciRoot()
     html += String(config.startMinute);
     html += "<br>Durata step: ";
     html += String(formatCountTime(config.relayDuration));
-    html += " sec";
+    html += " ";
     html += "<br>Giorni: ";
     html += giorniAbilitati();
     html += "</div>";
-
-    html += "<div class='card'><h2>Uscite attive</h2>";
-    html += listaUsciteAttive();
-	if (relayRunning()){
-		html += "<br>Tempo rimanente: ";
-		html += String(formatCountTime(relayRemainingSeconds()));
-	}
 
     html += "</body></html>";
 
@@ -275,14 +276,10 @@ void gestisciSistema()
     html += "<meta http-equiv='refresh' content='1'>";
 
     html += "<div class='card'>";
-    html += "<h2>Versione</h2>";
-    html += "SW: ";
-	html += getFirmwareVersion();
-	html += " , ";
-	html += getBuildDate();
-    html += "<br>";
-    html += "HW: ";
-	html += getHardwareName();
+	
+    //html += "<hr>";
+    html += "<a href='/setupRTC'><button>SETUP RTC</button></a>";
+    html += "<a href='/setupWiFi'><button>SETUP WIFI</button></a>";
     html += "<br>";
 	html += "</div>";
 
@@ -318,12 +315,19 @@ void gestisciSistema()
     else
         html += String(trtc,1);
     html += " C";
-
-    html += "<hr>";
-    html += "<a href='/setupRTC'><button>SETUP RTC</button></a>";
-    html += "<br><a href='/setupWiFi'><button>SETUP WIFI</button></a>";
-
     html += "</div>";
+	
+    html += "<div class='card'>";
+    html += "<h2>Versione</h2>";
+    html += "SW: ";
+	html += getFirmwareVersion();
+	html += " , ";
+	html += getBuildDate();
+    html += "<br>";
+    html += "HW: ";
+	html += getHardwareName();
+    html += "<br>";
+	html += "</div>";
 
     html += "</body></html>";
 

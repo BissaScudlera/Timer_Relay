@@ -142,7 +142,7 @@ const char* formatCountTime(uint32_t totalSeconds)
         snprintf(
             buffer,
             sizeof(buffer),
-            "%lu:%02lu:%02lu",
+            "%2uh %2lum %2lus",
             (unsigned long)hours,
             (unsigned long)minutes,
             (unsigned long)seconds);
@@ -152,7 +152,7 @@ const char* formatCountTime(uint32_t totalSeconds)
         snprintf(
             buffer,
             sizeof(buffer),
-            "%lu:%02lu",
+            "%lum %2lus",
             (unsigned long)minutes,
             (unsigned long)seconds);
     }
@@ -161,7 +161,7 @@ const char* formatCountTime(uint32_t totalSeconds)
         snprintf(
             buffer,
             sizeof(buffer),
-            "%lu",
+            "%lus",
             (unsigned long)seconds);
     }
 
