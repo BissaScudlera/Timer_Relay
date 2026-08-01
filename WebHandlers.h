@@ -7,7 +7,7 @@ void gestisciStart();
 void gestisciStop();
 void gestisciSalvaDurata();
 void gestisciSalvaOra();
-void gestisciSalvaMaschere();
+void gestisciSalvaCfg();
 
 void gestisciSalvaRTC();
 void gestisciSalvaWiFi();

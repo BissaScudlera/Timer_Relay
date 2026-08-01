@@ -66,13 +66,11 @@ void serverSetup()
         server.on("/sistema",       gestisciSistema);
         server.on("/setupRTC",      gestisciSetupRTC);
         server.on("/setupWiFi",     gestisciSetupWiFi);
-        // compatibilita vecchio link
-        server.on("/setup",         gestisciConfigurazione);
 
         server.on("/start", HTTP_POST, gestisciStart);
         server.on("/stop", HTTP_POST, gestisciStop);
 
-        server.on("/salva-maschere", HTTP_POST, gestisciSalvaMaschere);
+        server.on("/salva-cfg", HTTP_POST, gestisciSalvaCfg);
         server.on("/salva-rtc", HTTP_POST, gestisciSalvaRTC);
         server.on("/salva-wifi", HTTP_POST, gestisciSalvaWiFi);
         server.on("/salva-wifi-eeprom", HTTP_POST, gestisciSalvaWiFiEEPROM);

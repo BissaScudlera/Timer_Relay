@@ -9,6 +9,7 @@
 #include "RelayManager.h"
 #include "Diagnostics.h"
 #include "HttpServer.h"
+#include "Version.h"
 
 static String paginaInizio(const String& titolo)
 {
@@ -96,19 +97,19 @@ static String giorniAbilitati()
 {
     const char* giorni[7] =
     {
-        "Lun","Mar","Mer","Gio","Ven","Sab","Dom"
+        "Dom","Lun","Mar","Mer","Gio","Ven","Sab"
     };
 
     String s;
 
-    for(int i=0;i<7;i++)
+    for(int i=1;i<=7;i++)  //cycle executed from 1 to 7
     {
-        if(config.dayEnableMask[i])
+        if(config.dayEnableMask[i%7])  //modulo 7 (7%7=0)
         {
             if(s.length())
                 s += " - ";
 
-            s += giorni[i];
+            s += giorni[i%7];
         }
     }
 
@@ -128,17 +129,19 @@ void gestisciRoot()
     html += relayRunning() ? "ATTIVA" : "FERMA";
     html += "</div>";
 
-    html += "<div class='card'><h2>Data / Giorno / Ora</h2>";
+    //html += "<div class='card'><h2>Ora / Giorno / Data</h2>";
+	html += "<div class='card'><h2>Orologio</h2>";
     if(rtcGetStatus().available)
     {
-        html += rtcDateString();
-        html += "<br>";
+		
         html += rtcTimeString();
+        html += "<br>";
+        html += rtcDayString();
+        html += "<br>";
+        html += rtcDateString();
     }
     else{
-        html += "--/--/----";
-        html += "<br>";
-        html += "--:--:--";
+        html += "--:--:--<br>-----<br>--/--/----";
     }
     html += "</div>";
 
@@ -150,7 +153,7 @@ void gestisciRoot()
     if(config.startMinute < 10) html += "0";
     html += String(config.startMinute);
     html += "<br>Durata step: ";
-    html += String(config.relayDuration);
+    html += String(formatCountTime(config.relayDuration));
     html += " sec";
     html += "<br>Giorni: ";
     html += giorniAbilitati();
@@ -158,9 +161,10 @@ void gestisciRoot()
 
     html += "<div class='card'><h2>Uscite attive</h2>";
     html += listaUsciteAttive();
-    html += "<br>Tempo rimanente step: ";
-    html += String(relayRemainingSeconds());
-    html += " sec</div>";
+	if (relayRunning()){
+		html += "<br>Tempo rimanente: ";
+		html += String(formatCountTime(relayRemainingSeconds()));
+	}
 
     html += "</body></html>";
 
@@ -176,8 +180,8 @@ void gestisciComandi()
     html += "<div class='card'>";
     html += "<h2>Comandi manuali</h2>";
 
-    html += "<form action='/start' method='POST'><button>AVVIA CICLO</button></form>";
-    html += "<form action='/stop' method='POST'><button>STOP EMERGENZA</button></form>";
+    html += "<form action='/start' method='POST'><button>START</button></form>";
+    html += "<form action='/stop' method='POST'><button>STOP</button></form>";
 
     html += "</div>";
 
@@ -190,10 +194,10 @@ void gestisciComandi()
     html += "</div>";
 
     html += "<div class='card'><h2>Tempo</h2>";
-    html += String(relayRemainingSeconds());
-    html += " sec / ";
-    html += String(config.relayDuration);
-    html += " sec</div>";
+    html += String(formatCountTime(relayRemainingSeconds()));
+    html += "  / ";
+    html += String(formatCountTime(config.relayDuration));
+    html += " </div>";
 
     html += "</body></html>";
 
@@ -206,13 +210,23 @@ static String giorniEditabili()
 {
     const char* d[]={"Lun","Mar","Mer","Gio","Ven","Sab","Dom"};
     String h="<table><tr>";
+	
+	//Nomi
     for(int i=0;i<7;i++){ h+="<td>"; h+=d[i]; h+="</td>";}
+	
     h+="</tr><tr>";
-    for(int i=0;i<7;i++){
+	
+    for(uint8_t i=1;i<=7;i++){
+		uint8_t day= i%7;
+		
         h+="<td><input type='checkbox' name='d";
-        h+=String(i);
+        h+=String(day);
         h+="'";
-        if(config.dayEnableMask[i]) h+=" checked";
+		
+        if(config.dayEnableMask[day]) {
+			h+=" checked";
+		}
+		
         h+="></td>";
     }
     h+="</tr></table>";
@@ -224,7 +238,7 @@ void gestisciConfigurazione()
     String html = paginaInizio("Configurazione");
 
     html += "<div class='card'>";
-    html += "<form action='/salva-maschere' method='POST'>";
+    html += "<form action='/salva-cfg' method='POST'>";
     html += "<button>SALVA</button>";
 
     html += "<h3>Orario partenza</h3>";
@@ -261,11 +275,24 @@ void gestisciSistema()
     html += "<meta http-equiv='refresh' content='1'>";
 
     html += "<div class='card'>";
+    html += "<h2>Versione</h2>";
+    html += "SW: ";
+	html += getFirmwareVersion();
+	html += " , ";
+	html += getBuildDate();
+    html += "<br>";
+    html += "HW: ";
+	html += getHardwareName();
+    html += "<br>";
+	html += "</div>";
+
+    html += "<div class='card'>";
     html += "<h2>Diagnostica</h2>";
     html += "I2C: ";
     html += diagnosticsI2CState();
     html += "<br>RTC: ";
     html += diagnosticsRtcState();
+    html += "<br>";
     html += "<br>WiFi: ";
     html += diagnosticsWiFiState();
     html += "<br>Client connessi: ";

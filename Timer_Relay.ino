@@ -1,8 +1,7 @@
 // v1.2.4 patched
 
 /*********************************************
- Relay Timer
- V 1.8.9 (ESP32 web interface)
+ Relay Timer with ESP32 web interface
  Written by Jack and Gemini
  Refactored byChatGPT
 **********************************************/
@@ -48,8 +47,8 @@ uint32_t previousMillis;
 
 // DS3231 RTC configurations
 #include "RTClib.h"
-const char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-const char* shortDays[7] = {"Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};
+//const char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+//const char* shortDays[7] = {"Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};
 
 // MCP23017 I2C Port Expander configurations
 
@@ -63,13 +62,16 @@ bool lastResetStatus = false;                // Tracking flag for the button sta
 const unsigned long T_iResetLong = 5000;     // Threshold for long press action (3 seconds)
 const unsigned long T_iResetShort = 50;      // Minimum debounce threshold for short press action (50ms)
 
-// Forward function declarations
+
+// Forward function declarations------------------------------------------------------------------
+
 void runTimedSequence();
 void checkManualTrigger();
 void checkResetButton();
 bool DeviceAlive(byte Address, const char* Name);
 //void RelayTest();
 void printBin8();
+
 #if DEBUG
 void SerialMonitor(); 
 void checkSystemResetReason();
@@ -79,7 +81,7 @@ void serialPause();
   String generaHtmlRele();
   String generaHtmlGiorni();
 #endif
-
+//------------------------------------------------------------------------------------------------
 
 void setup() {
   // Initialize hardware digital I/O channels
@@ -433,7 +435,6 @@ void printBin8(uint8_t valore) {
     Serial.print((valore >> i) & 1);
   }
 }
-
 
 #if DEBUG
 void checkSystemResetReason() {

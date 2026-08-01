@@ -1,6 +1,8 @@
 #include "I2CManager.h"
 #include "RTCManager.h"
 
+const char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+const char* shortDays[7] = {"Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};
 
 static DateTime cachedNow;
 
@@ -110,6 +112,63 @@ const char* rtcDateString(void)
 
     return dateBuffer;
 }
+
+const char* rtcDayString(void)
+{
+    if (!rtcStatus.available)
+    {
+        return "-----";
+    }
+	
+    return daysOfTheWeek[cachedNow.dayOfTheWeek()];
+}
+
+
+const char* formatCountTime(uint32_t totalSeconds)
+{
+    if (totalSeconds <= 0){
+		return "--";
+	}
+	else{
+	
+	static char buffer[16];
+
+    uint32_t hours   = totalSeconds / 3600;
+    uint32_t minutes = (totalSeconds % 3600) / 60;
+    uint32_t seconds = totalSeconds % 60;
+
+    if (hours > 0)
+    {
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "%lu:%02lu:%02lu",
+            (unsigned long)hours,
+            (unsigned long)minutes,
+            (unsigned long)seconds);
+    }
+    else if (minutes > 0)
+    {
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "%lu:%02lu",
+            (unsigned long)minutes,
+            (unsigned long)seconds);
+    }
+    else
+    {
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "%lu",
+            (unsigned long)seconds);
+    }
+
+    return buffer;
+	}
+}
+
 
 static constexpr uint8_t RTC_I2C_ADDRESS = 0x68;
 

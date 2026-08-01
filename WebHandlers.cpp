@@ -22,7 +22,7 @@ void gestisciStop()
     server.send(303);
 }
 
-void gestisciSalvaMaschere()
+void gestisciSalvaCfg()
 {
     for (int i = 0; i < RELAY_NUMBER; i++)
     {
