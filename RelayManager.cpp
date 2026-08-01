@@ -55,6 +55,19 @@ uint32_t relayRemainingSeconds()
     return config.relayDuration - elapsed;
 }
 
+uint32_t relayProgramDurationSeconds()
+{
+    uint8_t activeRelays = 0;
+
+    for (uint8_t i = 0; i < RELAY_NUMBER; i++)
+    {
+        if (config.relayEnableMask[i])
+            activeRelays++;
+    }
+
+    return activeRelays * config.relayDuration;
+}
+
 void runTimedSequence()
 {
     if (state == RelayState::Idle)

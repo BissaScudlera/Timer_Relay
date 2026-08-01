@@ -162,7 +162,9 @@ void gestisciRoot()
     html += String(config.startMinute);
     html += "<br>Durata step: ";
     html += String(formatCountTime(config.relayDuration));
-    html += " ";
+    html += "<br>";
+	html += "<br>Durata programma: ";
+	html += formatCountTime(relayProgramDurationSeconds());
     html += "<br>Giorni: ";
     html += giorniAbilitati();
     html += "</div>";
@@ -192,10 +194,8 @@ void gestisciComandi()
 
     html += "<div class='card'><h2>Uscite attive</h2>";
     html += listaUsciteAttive();
-    html += "</div>";
-
-    html += "<div class='card'><h2>Tempo</h2>";
-    html += String(formatCountTime(relayRemainingSeconds()));
+    html += "<br>";
+    html += String(formatCountTime(relayElapsedSeconds()));
     html += "  / ";
     html += String(formatCountTime(config.relayDuration));
     html += " </div>";

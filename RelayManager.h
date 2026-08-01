@@ -18,5 +18,6 @@ void relayStart();
 void relayStop();
 uint32_t relayElapsedSeconds();
 uint32_t relayRemainingSeconds();
+uint32_t relayProgramDurationSeconds();
 
 #endif
