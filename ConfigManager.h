@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 
-#define RELAY_NUMBER 16
+#define RELAY_NUMBER 20
 
 struct Config
 {

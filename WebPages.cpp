@@ -68,7 +68,7 @@ static String tabellaRelay()
             s += "<tr>";
 
         s += "<td>";
-        s += "Val ";
+        s += "IRR ";
         s += String(i+1);
         s += "<br>";
 

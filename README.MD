@@ -1,5 +1,15 @@
 # Timer_Relay
 
+##Librerie utilizzate
+RTClib      https://github.com/adafruit/RTClib  
+            testato con: v2.1.4
+Dipende da: Adafruit BusIO https://github.com/adafruit/Adafruit_BusIO   
+            testato con: v1.17.4
+
+MCP23017    https://github.com/blemasle/arduino-mcp23017
+            testato con: v2.0.0 
+
+
 ## Descrizione
 Firmware ESP32 per gestione irrigazione con:
 - gestione relè/valvole;

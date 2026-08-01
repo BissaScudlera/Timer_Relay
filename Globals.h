@@ -2,10 +2,12 @@
 #define GLOBALS_H
 
 #define DEBUG 1
+#define DBG_SETUP 0
 
 #include "ConfigManager.h"
-#include "RTClib.h"
-#include <MCP23017.h>
+#include "RTClib.h"             //v2.1.4  https://github.com/adafruit/RTClib
+//Depends from: Adafruit BusIO  //v1.17.4 https://github.com/adafruit/Adafruit_BusIO
+#include <MCP23017.h>           //v2.0.0  https://github.com/blemasle/arduino-mcp23017
 #include "DeviceStatus.h"
 
 extern bool relay[RELAY_NUMBER];
@@ -13,10 +15,19 @@ extern int currentRelayIndex;
 //extern unsigned long relayActiveSeconds;
 
 
-extern byte BankA;
-extern byte BankB;
+#define MCP1_ENABLE	1
+#define MCP1_ADR 0x20
+
+#define MCP2_ENABLE	1
+#define MCP2_ADR 0x23
+
+extern byte BankA; //mcp1 output
+extern byte BankB; //mcp1 output
+extern byte BankC; //mcp2 output
+extern byte BankD; //mcp2 input
 
 extern MCP23017 mcp1;
+extern MCP23017 mcp2;
 
 extern RTC_DS3231 rtc;
 extern DateTime now;

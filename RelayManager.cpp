@@ -1,6 +1,10 @@
 #include "RelayManager.h"
 #include "Globals.h"
 #include "TimeBase.h"
+#if DEBUG
+ #include "Debug.h"
+#endif
+ 
 
 #include <cstring>
 
@@ -12,16 +16,35 @@ RelayState relayState()
     return state;
 }
 
+const char* relayStateString()
+{
+    switch (relayState())
+    {
+        case RelayState::Idle:
+            return "Idle";
+
+        case RelayState::Starting:
+            return "Starting";
+
+        case RelayState::Running:
+            return "Running";
+
+        case RelayState::Finished:
+            return "Finished";
+
+        default:
+            return "Unknown";
+    }
+}
+
 bool relayRunning()
 {
-    return state == RelayState::Starting ||
-           state == RelayState::Running;
+    return state == RelayState::Running;
 }
 
 void relayStart()
 {
-    if (state == RelayState::Idle ||
-        state == RelayState::Finished)
+    if (state == RelayState::Idle)
     {
         state = RelayState::Starting;
     }
@@ -29,12 +52,7 @@ void relayStart()
 
 void relayStop()
 {
-    state = RelayState::Idle;
-
-    memset(relay, LOW, sizeof(relay));
-
-    currentRelayIndex = 0;
-    relayStartMs = 0;
+    state = RelayState::Finished;
 }
 
 uint32_t relayElapsedSeconds()
@@ -72,6 +90,7 @@ void runTimedSequence()
 {
     if (state == RelayState::Idle)
     {
+		DBG_PRINTLN("[relay manager] timed sequence: IDLE");
         if (config.dayEnableMask[now.dayOfTheWeek()] &&
             now.hour() == config.startHour &&
             now.minute() == config.startMinute &&
@@ -80,9 +99,24 @@ void runTimedSequence()
             state = RelayState::Starting;
         }
     }
+	
+	if (state == RelayState::Finished)
+    {
+        DBG_PRINTLN("[relay manager] timed sequence: FINISHED");
+    
+        currentRelayIndex = 0;
+        relayStartMs = 0;
+    
+        memset(relay, LOW, sizeof(relay));
+    
+        state = RelayState::Idle;
+    
+        return;
+    }
 
     if (state == RelayState::Starting)
     {
+		DBG_PRINTLN("[relay manager] timed sequence: STARTING");
         if (config.relayDuration == 0) {
           state = RelayState::Finished;
           currentRelayIndex = 0;
@@ -115,9 +149,12 @@ void runTimedSequence()
         return;
     }
 
-    if (state != RelayState::Running)
+    if (state != RelayState::Running){
+		DBG_PRINTLN("[relay manager] timed sequence: NOT RUNNING");
         return;
-
+	}
+    DBG_PRINTLN("[relay manager] timed sequence: RUNNING");
+	
     if ((nowMs() - relayStartMs) < (config.relayDuration * 1000UL))
         return;
 

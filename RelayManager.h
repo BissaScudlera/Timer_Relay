@@ -13,6 +13,7 @@ enum class RelayState
 
 void runTimedSequence();
 RelayState relayState();
+const char* relayStateString();
 bool relayRunning();
 void relayStart();
 void relayStop();

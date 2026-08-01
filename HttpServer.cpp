@@ -27,7 +27,7 @@ void toggleWebServer()
 
         webServerAttivo = false;
 
-        DBG_PRINT("\n[SISTEMA] Wi-Fi e Web Server DISATTIVATI.\n");
+        DBG_PRINTLN("\r\n[SYS] Wi-Fi e Web Server DISATTIVATI.");
     }
     else
     {
@@ -37,9 +37,9 @@ void toggleWebServer()
 
             webServerAttivo = true;
 
-            DBG_PRINT("\n[SISTEMA] Wi-Fi e Web Server ATTIVATI.\n");
-            DBG_PRINT("[SISTEMA] SSID: " + String(ssid) + "\n");
-            DBG_PRINT("[SISTEMA] IP: 192.168.4.1\n");
+            DBG_PRINTLN("\r\n[SYS] Wi-Fi e Web Server ATTIVATI.");
+            DBG_PRINTLN("[SYS] SSID: " + String(ssid) );
+            DBG_PRINTLN("[SYS] IP: 192.168.4.1");
         }
     }
 }
@@ -50,15 +50,15 @@ void serverSetup()
 {
     if (strlen(password) < 8)
     {
-        DBG_PRINT("\n[ERRORE WI-FI] Password troppo corta.\n");
+        DBG_PRINTLN("[WI-FI] Errore! Password troppo corta.");
         return;
     }
 
     if (WiFi.softAP(ssid, password))
     {
-        DBG_PRINT("\n[WI-FI] Access Point creato.\n");
-        DBG_PRINT("[WI-FI] SSID: " + String(ssid) + "\n");
-        DBG_PRINT("[WI-FI] IP: 192.168.4.1\n");
+        DBG_PRINTLN("[WI-FI] Access Point creato.");
+        DBG_PRINTLN("[WI-FI] SSID: " + String(ssid));
+        DBG_PRINTLN("[WI-FI] IP: 192.168.4.1");
 
         server.on("/",              gestisciRoot);
         server.on("/comandi",       gestisciComandi);
