@@ -41,17 +41,13 @@ All'accensione:
 HTTP SERVER Defaults: IP:192.168.4.1, porta:80
 
 Digital Output:
-        -Error: si è verificato un errore dall'ultimo riavvio (attualmente LED_BUILTIN)
-        -AP_ON: il server è attivo(To Do)
+  -Error: si è verificato un errore dall'ultimo riavvio (attualmente LED_BUILTIN)
+  -AP_ON: il server è attivo(To Do)
 
 Digital Input: 
-        -pulsante start
-                  pressione rapida: avvio manuale ciclo irrigazione
-
-        -pulsante stop
-                  pressione rapida: arresta il ciclo di irrigazione corrente
-                  pressione prolungata(5s): -commuta l'accensione dell'AP wifi 
-                                            -funzione da abilitare tramite jumper?
+  -pulsante start: pressione rapida > avvio manuale ciclo irrigazione
+  -pulsante stop:  pressione rapida > arresta il ciclo di irrigazione corrente
+                   pressione prolungata(5s) > commuta l'accensione dell'AP wifi, funzione da abilitare tramite jumper?
 
 jumper di configuazione:
         -reset impostazioni default (quando attivo al riavvio le impostazioni NVM vengono sovrascritte)
