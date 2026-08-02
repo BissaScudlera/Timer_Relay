@@ -14,7 +14,12 @@
 #include "WebHandlers.h"
 
 #include <Preferences.h>
-#include "wifi_config.h"
+#if DEBUG
+ #define AP_SSID "ESP32"
+ #define AP_PWD  "12345678"
+#else
+ #include "wifi_config.h"
+#endif
 
 //---------------------------------------------------------------------------
 // Oggetti globali del WebServer
