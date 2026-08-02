@@ -12,6 +12,7 @@
 
 #include "WebPages.h"
 #include "WebHandlers.h"
+#include "wifi_config.h"
 
 //---------------------------------------------------------------------------
 // Oggetti globali del WebServer
@@ -19,8 +20,8 @@
 
 extern WebServer server;
 
-extern const char* ssid;
-extern const char* password;
+extern const char* Wifi_ssid;
+extern const char* Wifi_password;
 
 extern bool webServerAttivo;
 

@@ -371,7 +371,7 @@ void gestisciSetupWiFi()
 
     html += "SSID:<br>";
     html += "<input type='text' name='ssid' value='";
-    html += ssid;
+    html += Wifi_ssid;
     html += "'><br>";
 
     html += "Password:<br>";

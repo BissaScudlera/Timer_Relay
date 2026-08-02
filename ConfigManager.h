@@ -2,12 +2,14 @@
 #define CONFIG_MANAGER_H
 #include <Arduino.h>
 
+#include <Preferences.h>
+
 
 #define RELAY_NUMBER 20
 
 struct Config
 {
-    //Active time per relay in seconds
+	//Active time per relay in seconds
 	unsigned long relayDuration;
 	
 	//Relay channel activation mask (HIGH = active, LOW = skipped)
@@ -23,5 +25,8 @@ struct Config
 };
 
 extern Config config;
+
+bool saveConfig();
+bool loadConfig();
 
 #endif

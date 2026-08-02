@@ -7,8 +7,8 @@
 //------------------------------------------------------------
 
 //Wifi Configuration
-const char* ssid = "ESP32" ;
-const char* password = "12345678" ;
+const char* Wifi_ssid = AP_SSID ;
+const char* Wifi_password = AP_PWD ;
 
 WebServer server(80);
 
@@ -31,14 +31,14 @@ void toggleWebServer()
     }
     else
     {
-        if (WiFi.softAP(ssid, password))
+        if (WiFi.softAP(Wifi_ssid, Wifi_password))
         {
             server.begin();
 
             webServerAttivo = true;
 
             DBG_PRINTLN("\r\n[SYS] Wi-Fi e Web Server ATTIVATI.");
-            DBG_PRINTLN("[SYS] SSID: " + String(ssid) );
+            DBG_PRINTLN("[SYS] SSID: " + String(Wifi_ssid) );
             DBG_PRINTLN("[SYS] IP: 192.168.4.1");
         }
     }
@@ -48,16 +48,17 @@ void toggleWebServer()
 
 void serverSetup()
 {
-    if (strlen(password) < 8)
+	
+    if (strlen(Wifi_password) < 8)
     {
         DBG_PRINTLN("[WI-FI] Errore! Password troppo corta.");
         return;
     }
 
-    if (WiFi.softAP(ssid, password))
+    if (WiFi.softAP(Wifi_ssid, Wifi_password))
     {
         DBG_PRINTLN("[WI-FI] Access Point creato.");
-        DBG_PRINTLN("[WI-FI] SSID: " + String(ssid));
+        DBG_PRINTLN("[WI-FI] SSID: " + String(Wifi_ssid));
         DBG_PRINTLN("[WI-FI] IP: 192.168.4.1");
 
         server.on("/",              gestisciRoot);

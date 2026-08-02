@@ -21,10 +21,10 @@ extern int currentRelayIndex;
 #define MCP2_ENABLE	1
 #define MCP2_ADR 0x23
 
-extern byte BankA; //mcp1 output
-extern byte BankB; //mcp1 output
-extern byte BankC; //mcp2 output
-extern byte BankD; //mcp2 input
+extern byte BankA; //mcp1 portA output
+extern byte BankB; //mcp1 portB output
+extern byte BankC; //mcp2 portB output
+extern byte BankD; //mcp2 portA input
 
 extern MCP23017 mcp1;
 extern MCP23017 mcp2;

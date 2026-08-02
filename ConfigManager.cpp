@@ -1,9 +1,11 @@
 #include "ConfigManager.h"
 
+Preferences prefs;
+
 Config config =
-{
+{	
 	//Active time per relay in seconds
-    .relayDuration = 15*60,
+    .relayDuration = 20*60,
     //Relay channel activation mask (HIGH = active, LOW = skipped)
     .relayEnableMask =
     {
@@ -24,3 +26,31 @@ Config config =
     .startMinute = 0,
     .startSecond = 0
 };
+
+bool saveConfig()
+{
+    prefs.begin("timer", false);
+
+    size_t written = prefs.putBytes("config", &config, sizeof(config));
+
+    prefs.end();
+
+    return (written == sizeof(config));
+}
+
+bool loadConfig()
+{
+    prefs.begin("timer", true);   // sola lettura
+
+    if (prefs.getBytesLength("config") != sizeof(config))
+    {
+        prefs.end();
+        return false;             // nessuna configurazione valida
+    }
+
+    prefs.getBytes("config", &config, sizeof(config));
+
+    prefs.end();
+
+    return true;
+}

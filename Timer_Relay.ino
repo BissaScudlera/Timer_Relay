@@ -1,10 +1,10 @@
-// v1.2.4 patched
 
 /*********************************************
  Relay Timer with ESP32 web interface
  Written by Jack and Gemini
  Refactored byChatGPT
 **********************************************/
+
 #include <Arduino.h>
 #include "Version.h"
 #include "ConfigManager.h"  //SETUP PARAMETERS
@@ -72,6 +72,7 @@ void checkResetButton();
 bool DeviceAlive(byte Address, const char* Name);
 //void RelayTest();
 void printBin8();
+uint8_t reverseByte();
 
 #if DEBUG
 void SerialMonitor(); 
@@ -134,7 +135,7 @@ void setup() {
     mcp2.writeRegister(MCP23017Register::GPIO_A, 0xFF);  // Purge/Reset internal latch register A 
     mcp2.writeRegister(MCP23017Register::GPIO_B, 0xFF);  // Purge/Reset internal latch register B
 	//input bank options
-	mcp2.writeRegister(MCP23017Register::GPPU_A, 0xFF);   //Internal pull-up enabled on Port A
+	  mcp2.writeRegister(MCP23017Register::GPPU_A, 0xFF);   //Internal pull-up enabled on Port A
     mcp2.writeRegister(MCP23017Register::IPOL_A, 0x00);   //Same logic as the input pins state
     //mcp.writeRegister(MCP23017Register::IPOL_A, 0xFF);  // Uncomment this line to invert inputs
   }
@@ -156,8 +157,15 @@ void setup() {
     rtc.disableAlarm(2);
     rtc.writeSqwPinMode(DS3231_OFF);
   }
+  //Load saved configurations
+  if (!loadConfig()){
+	  DBG_PRINTLN("[CFG] Failed to load preferencies from memory");
+	  saveConfig();
+  }
+  
   
   #ifdef WEB_SERVER_H
+    //WiFi AP credentials
     serverSetup();
   #endif
 
@@ -183,13 +191,15 @@ void loop() {
 
   // Primary execution block triggered exactly once per second
   if (currentMillis - previousMillis >= 1000) {
-    if (!rtcGetStatus().available)
+    /*
+	if (!rtcGetStatus().available)
     {
       if (taskExpired(rtcRecoveryTask))
       {
         rtcRecover();
       }
     }
+	*/
     rtcUpdate();
     previousMillis = currentMillis; 
     // Handle I2C peripheral hardware bus errors (AVR architecture only)
@@ -213,7 +223,6 @@ void loop() {
     BankA = 0;
     BankB = 0;
     BankC = 0;
-
     for (uint8_t i = 0; i < RELAY_NUMBER; i++)
     {
         if (i < 8)
@@ -229,15 +238,19 @@ void loop() {
             BankC |= (relay[i] << (i - 16));
         }
     }
+	//invert logic and mirror MCP1-portA (it's upside down on the PCB)
+	BankA= reverseByte(~BankA);
+	BankB= ~BankB;
+	BankC= ~BankC;
 
     // Refresh current states across physical peripheral devices
     if (MCP1_ENABLE && DeviceAlive(MCP1_ADR,"Relay Interface 1")){
-      mcp1.writePort(MCP23017Port::A, ~BankA);
-      mcp1.writePort(MCP23017Port::B, ~BankB);
+      mcp1.writePort(MCP23017Port::A, BankA);
+      mcp1.writePort(MCP23017Port::B, BankB);
     }
 	if (MCP2_ENABLE && DeviceAlive(MCP2_ADR,"Relay Interface 2")){
+      mcp2.writePort(MCP23017Port::B, BankC);
       BankD = mcp2.readPort(MCP23017Port::A);
-      mcp2.writePort(MCP23017Port::B, ~BankC);
     }
     if (ErrState != 0){
       digitalWrite(oLedDebug, HIGH);
@@ -404,31 +417,41 @@ void SerialMonitor(){
   
   // Output literal internal peripheral latched configuration profiles
   Serial.print("Output HW: ");
+  Serial.print('[');
+  printBin8(reverseByte(BankA));
+  Serial.print(' ');
+  printBin8(BankB);
+  Serial.print(' ');
+  printBin8(reverseByte(BankC));
+/*
   if(MCP1_ENABLE && DeviceAlive(MCP1_ADR,"Interface 1")){
 	Serial.print("[");
-    printBin8(mcp1.readRegister(MCP23017Register::OLAT_B));
+    printBin8(mcp1.readPort(MCP23017Port::A));
     Serial.print(' ');
-    printBin8(mcp1.readRegister(MCP23017Register::OLAT_A));
+    printBin8(mcp1.readPort(MCP23017Port::B));
   }
   if(MCP2_ENABLE && DeviceAlive(MCP2_ADR,"Interface 2")){
     Serial.print(' ');
-    printBin8(mcp1.readRegister(MCP23017Register::OLAT_B));
+    printBin8(mcp2.readPort(MCP23017Port::B));
   }
+*/
   Serial.println("]");
-	
-  // Output literal internal peripheral latched configuration profiles
+
   Serial.print("Input HW: [");
+  printBin8(BankD);
+  /*
   if(MCP2_ENABLE && DeviceAlive(MCP2_ADR,"Interface 2")){
-    printBin8(mcp1.readRegister(MCP23017Register::OLAT_A));
+    printBin8(mcp2.readPort(MCP23017Port::A));       
   }
+  */
   Serial.println("]");
   
   // various inputs debug output, to be removed
   Serial.print("Misc Inputs: ");
   Serial.print("Start(");
-  Serial.print(lastTrigState);;
+  Serial.print(lastTrigState);
   Serial.print(") Stop (");
-  Serial.print(lastResetStatus);;
+  Serial.print(lastResetStatus);
   Serial.println(")");
 	
 
@@ -498,6 +521,14 @@ void printBin8(uint8_t valore) {
   for (int i = 7; i >= 0; i--) {
     Serial.print((valore >> i) & 1);
   }
+}
+
+uint8_t reverseByte(uint8_t b)
+{
+    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+    b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+    return b;
 }
 
 #if DEBUG

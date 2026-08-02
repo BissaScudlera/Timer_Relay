@@ -6,13 +6,13 @@
 
 extern uint32_t currentMillis;
 
-extern TaskTimer rtcTask;
-extern TaskTimer i2cTask;
-extern TaskTimer sensorTask;
-extern TaskTimer diagTask;
-extern TaskTimer displayTask;
-extern TaskTimer eepromTask;
-extern TaskTimer rtcRecoveryTask;
+//extern TaskTimer rtcTask;
+//extern TaskTimer i2cTask;
+//extern TaskTimer sensorTask;
+//extern TaskTimer diagTask;
+//extern TaskTimer displayTask;
+//extern TaskTimer eepromTask;
+//extern TaskTimer rtcRecoveryTask;
 
 inline uint32_t nowMs()
 {

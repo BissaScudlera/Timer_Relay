@@ -83,12 +83,12 @@ void gestisciSalvaWiFi()
 
         if(nuovoSSID.length() > 0 && nuovaPassword.length() >= 8)
         {
-            ssid = strdup(nuovoSSID.c_str());
-            password = strdup(nuovaPassword.c_str());
+            Wifi_ssid = strdup(nuovoSSID.c_str());
+            Wifi_password = strdup(nuovaPassword.c_str());
 
             WiFi.softAPdisconnect(true);
             delay(100);
-            WiFi.softAP(ssid, password);
+            WiFi.softAP(Wifi_ssid, Wifi_password);
         }
     }
 
@@ -99,8 +99,8 @@ void gestisciSalvaWiFi()
 
 void gestisciSalvaWiFiEEPROM()
 {
-    // FUTURO:
-    // Salvataggio permanente configurazione WiFi su EEPROM/NVS.
+    
+    // Salvataggio permanente configurazione WiFi su NVS.
     // Parametri previsti:
     // - SSID
     // - password
