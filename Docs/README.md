@@ -54,7 +54,7 @@ Digital Input:
                                             -funzione da abilitare tramite jumper?
 
 jumper di configuazione:
-	-reset impostazioni default (quando attivo al riavvio le impostazioni NVM vengono sovrascritte)
+        -reset impostazioni default (quando attivo al riavvio le impostazioni NVM vengono sovrascritte)
         -debug setup (quando attivo il debug seriale, attende connessione prima di iniziare il Loop()
         -abilitazione AP (To Do: forza stato accensione AP)
 
@@ -65,5 +65,5 @@ flag compilatore:
 
 impostazioni default:
         -wifi_config.h       impostazioni AP e webserver(To Do)
-	-ConfigManager.cpp   impostazioni timer rele
+        -ConfigManager.cpp   impostazioni timer rele
         -Timer_Relay.ino     impostazioni indirizzi I/O,

@@ -2,7 +2,7 @@
 #define GLOBALS_H
 
 //configuration flags and HW inputs
-#define DEBUG 1
+#define DEBUG 0
 extern bool DBG_SETUP;
 extern bool FactoryReset;
 

@@ -11,8 +11,8 @@ ConfigT configTimer =
         HIGH,HIGH,HIGH,HIGH,
         HIGH,HIGH,HIGH,HIGH,  //8
         HIGH,HIGH,HIGH,HIGH,
-        HIGH,HIGH,HIGH,HIGH,  //16
-        HIGH,HIGH,LOW,LOW     //18 Active, 20 Available 
+        HIGH,HIGH,HIGH,HIGH,  //16 Active
+        LOW,LOW,LOW,LOW       //20 Available 
     },
 	//Weekday execution mask (Index 0 = Sunday, ..., 6 = Saturday)
     .dayEnableMask =

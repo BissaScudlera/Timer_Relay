@@ -1,9 +1,8 @@
 #include "RelayManager.h"
 #include "Globals.h"
 #include "TimeBase.h"
-#if DEBUG
- #include "Debug.h"
-#endif
+#include "Debug.h"
+
  
 
 #include <cstring>

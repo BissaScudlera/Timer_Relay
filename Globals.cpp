@@ -1,7 +1,7 @@
 #include "Globals.h"
 
 //configuration flags and HW inputs
-//#define DEBUG 1
+//bool DEBUG= false;
 bool DBG_SETUP= false;
 bool FactoryReset= false;
 
