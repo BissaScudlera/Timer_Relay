@@ -96,21 +96,24 @@ void readWifiConfigFromRequest(){
             strlcpy(configWifi.ssid, nuovoSSID.c_str(), sizeof(configWifi.ssid));
             strlcpy(configWifi.pswd, nuovaPassword.c_str(), sizeof(configWifi.pswd));
 
-            //Wifi_ssid = configWifi.ssid;
-            //Wifi_password = configWifi.pswd;
-
+            
+            server.sendHeader("Location", "/setupWiFi?saved=1");
+            server.send(303);
+            delay(20);
             WiFi.softAPdisconnect(true);
             delay(100);
             WiFi.softAP(configWifi.ssid, configWifi.pswd);
-        }
+        } else {
+            server.sendHeader("Location", "/setupWiFi?saved=0");
+            server.send(303);
+			DBG_PRINTLN("[WI-FI] Errore! Password troppo corta.");
+		}
     }
 }
 
 void gestisciSalvaWiFi()
 {
     readWifiConfigFromRequest();
-    server.sendHeader("Location", "/setupWiFi?saved=1");
-    server.send(303);
 }
 
 
@@ -120,8 +123,6 @@ void gestisciSalvaWiFiEEPROM()
 	// Salvataggio permanente configurazione WiFi su NVS.
 	saveConfigWifi();
 	DBG_PRINTLN("[CFG] Saved Wifi config to EEPROM");
-    server.sendHeader("Location", "/setupWiFi?saved=1");
-    server.send(303);
 }
 
 #endif

@@ -185,11 +185,11 @@ void gestisciComandi()
     html += "<meta http-equiv='refresh' content='1'>";
     if (server.hasArg("started"))
     {
-      html += "<div class='ok'>Cycle started.</div>";
+      html += "<div class='info'>Ciclo avviato</div>";
     }
     if (server.hasArg("stopped"))
     {
-      html += "<div class='ko'>Cycle stopped.</div>";
+      html += "<div class='info'>Ciclo arrestato</div>";
     }
 
     html += "<div class='card'>";
@@ -251,7 +251,10 @@ void gestisciConfigurazione()
     String html = paginaInizio("Configurazione");
     if (server.hasArg("saved"))
     {
-      html += "<div class='info'>Configuration saved successfully.</div>";
+		if (server.arg("saved") == "1")
+			html += "<div class='ok'>Parametri salvati.</div>";
+		else
+			html += "<div class='ko'>Errore: parametri non salvati.</div>";
     }
 
     html += "<div class='card'>";
@@ -396,7 +399,10 @@ void gestisciSetupWiFi()
     String html = paginaInizio("Setup WiFi");
     if (server.hasArg("saved"))
     {
-      html += "<div class='info'>Configuration saved successfully.</div>";
+		if (server.arg("saved") == "1")
+            html += "<div class='ok'>Configurazione aggiornata</div>";
+		else
+			html += "<div class='ko'>Errore: configurazione scartata</div>";
     }
 	
     html += "<div class='card'>";
