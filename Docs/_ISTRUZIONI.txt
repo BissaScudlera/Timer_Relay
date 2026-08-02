@@ -1,3 +1,5 @@
+HTTP SERVER Defaults: IP:192.168.4.1, porta:80
+
 Digital Output:
         -Error: si è verificato un errore dall'ultimo riavvio (attualmente LED_BUILTIN)
         -AP_ON: il server è attivo(To Do)
