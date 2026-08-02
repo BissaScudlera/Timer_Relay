@@ -133,16 +133,16 @@ void setup() {
 
   // Configure MCP23017 GPIO data direction registers
   if (MCP1_ENABLE && DeviceAlive(MCP1_ADR,"Relay Interface 1")){
+    mcp1.writeRegister(MCP23017Register::OLAT_A, 0xFF);  // Purge/Reset internal latch register A, prevents initialization glitch
+    mcp1.writeRegister(MCP23017Register::OLAT_B, 0xFF);  // Purge/Reset internal latch register B, prevents initialization glitch
     mcp1.portMode(MCP23017Port::A, 0); // Define Port A banks as digital output channels
     mcp1.portMode(MCP23017Port::B, 0); // Define Port B banks as digital output channels
-    mcp1.writeRegister(MCP23017Register::GPIO_A, 0xFF);  // Purge/Reset internal latch register A 
-    mcp1.writeRegister(MCP23017Register::GPIO_B, 0xFF);  // Purge/Reset internal latch register B
   }
   if (MCP2_ENABLE && DeviceAlive(MCP2_ADR,"Relay Interface 2")){
+    mcp2.writeRegister(MCP23017Register::OLAT_A, 0xFF);  // Purge/Reset internal latch register A, prevents initialization glitch
+    mcp2.writeRegister(MCP23017Register::OLAT_B, 0xFF);  // Purge/Reset internal latch register B, prevents initialization glitch
     mcp2.portMode(MCP23017Port::A, 0b11111111); // Define Port A banks as digital input channels
     mcp2.portMode(MCP23017Port::B, 0); // Define Port B banks as digital output channels
-    mcp2.writeRegister(MCP23017Register::GPIO_A, 0xFF);  // Purge/Reset internal latch register A 
-    mcp2.writeRegister(MCP23017Register::GPIO_B, 0xFF);  // Purge/Reset internal latch register B
 	//input bank options
 	  mcp2.writeRegister(MCP23017Register::GPPU_A, 0xFF);   //Internal pull-up enabled on Port A
     mcp2.writeRegister(MCP23017Register::IPOL_A, 0x00);   //Same logic as the input pins state
