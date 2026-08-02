@@ -20,5 +20,5 @@ wifi_config.h
 
 
 # Local folders
-/utils
-/interazioni_IA
+#/utils
+#/docs
