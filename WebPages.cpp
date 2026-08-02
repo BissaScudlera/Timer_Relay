@@ -21,6 +21,9 @@ static String paginaInizio(const String& titolo)
     html += "<style>";
     html += "body{font-family:Arial;text-align:center;background:#f2f2f2}";
     html += ".card{background:white;margin:10px auto;padding:15px;border-radius:10px;max-width:500px}";
+	html += ".info{background:lightblue;color:navy;border:2px solid blue;margin:10px auto;padding:15px;border-radius:10px;max-width:500px;font-weight:bold;text-align:center}";
+    html += ".ok{background:lightgreen;color:darkgreen;border:2px solid green;margin:10px auto;padding:15px;border-radius:10px;max-width:500px;font-weight:bold;text-align:center}";
+	html += ".ko{background:coral;color:darkred;border:2px solid maroon;margin:10px auto;padding:15px;border-radius:10px;max-width:500px;font-weight:bold;text-align:center}";
     html += "button{padding:12px;margin:5px}";
     html += "table{margin:auto;border-collapse:collapse}";
     html += "td,th{border:1px solid #ccc;padding:8px}";
@@ -180,6 +183,14 @@ void gestisciComandi()
 {
     String html = paginaInizio("Comandi");
     html += "<meta http-equiv='refresh' content='1'>";
+    if (server.hasArg("started"))
+    {
+      html += "<div class='ok'>Cycle started.</div>";
+    }
+    if (server.hasArg("stopped"))
+    {
+      html += "<div class='ko'>Cycle stopped.</div>";
+    }
 
     html += "<div class='card'>";
     html += "<h2>Comandi manuali</h2>";
@@ -240,7 +251,7 @@ void gestisciConfigurazione()
     String html = paginaInizio("Configurazione");
     if (server.hasArg("saved"))
     {
-      html += "<div class='ok'>Configuration saved successfully.</div>";
+      html += "<div class='info'>Configuration saved successfully.</div>";
     }
 
     html += "<div class='card'>";
@@ -277,7 +288,10 @@ void gestisciConfigurazione()
     html += "&nbsp;";
     
     html += "<button type='submit' formaction='/salva-cfg-eeprom'>";
-    html += "SALVA EEPROM";
+    html += "SALVA";
+	#if DEBUG
+	  html +=" EEPROM";
+	#endif
     html += "</button>";   
 	
 	html += "</form></div>";
@@ -382,7 +396,7 @@ void gestisciSetupWiFi()
     String html = paginaInizio("Setup WiFi");
     if (server.hasArg("saved"))
     {
-      html += "<div class='ok'>Configuration saved successfully.</div>";
+      html += "<div class='info'>Configuration saved successfully.</div>";
     }
 	
     html += "<div class='card'>";

@@ -26,7 +26,7 @@
   const int iFactoryReset  = 18; // PIN D18: stops loading parameters from NVM and overrides them with Source code defaults
   const int iDBG_SETUP     = 19; // PIN D19: pauses the program after setup(), waits for serial input.
   const int oLedDebug      = LED_BUILTIN; // Uses ESP32 native built-in LED (GPIO 2)
-  const unsigned long SERIAL_BAUD = 115200; // Recommended baud rate for ESP32
+  const unsigned long SERIAL_BAUD = 115200; // Recommended baud rate for ESP32: 115200
 #else
   // Arduino Nano configuration
   const int iTriggerButton = 2;  // PIN D2: Manual Sequence Start, debounced push button 
@@ -497,6 +497,8 @@ void SerialMonitor(){
   Serial.print("Misc Inputs: ");
   Serial.print("Factory Reset(");
   Serial.print(FactoryReset);
+  Serial.print(") PowerOn Pause(");
+  Serial.print(DBG_SETUP);
   Serial.print(") Start(");
   Serial.print(lastTrigState);
   Serial.print(") Stop (");

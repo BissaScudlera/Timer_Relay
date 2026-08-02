@@ -11,14 +11,14 @@
 void gestisciStart()
 {
     relayStart();
-    server.sendHeader("Location", "/comandi");
+    server.sendHeader("Location", "/comandi?started=1");
     server.send(303);
 }
 
 void gestisciStop()
 {
     relayStop();
-    server.sendHeader("Location", "/comandi");
+    server.sendHeader("Location", "/comandi?stopped=1");
     server.send(303);
 }
 
