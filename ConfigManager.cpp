@@ -1,8 +1,7 @@
 #include "ConfigManager.h"
+#include "Debug.h"
 
-Preferences prefs;
-
-Config config =
+ConfigT configTimer =
 {	
 	//Active time per relay in seconds
     .relayDuration = 20*60,
@@ -27,28 +26,33 @@ Config config =
     .startSecond = 0
 };
 
-bool saveConfig()
+bool saveConfigTimer()
 {
+	Preferences prefs;
+	
     prefs.begin("timer", false);
 
-    size_t written = prefs.putBytes("config", &config, sizeof(config));
+    size_t written = prefs.putBytes("config", &configTimer, sizeof(configTimer));
 
     prefs.end();
 
-    return (written == sizeof(config));
+    return (written == sizeof(configTimer));
 }
 
-bool loadConfig()
+bool loadConfigTimer()
 {
+	Preferences prefs;
+	
     prefs.begin("timer", true);   // sola lettura
 
-    if (prefs.getBytesLength("config") != sizeof(config))
+    if (prefs.getBytesLength("config") != sizeof(configTimer))
     {
         prefs.end();
+	    DBG_PRINTLN("[CFG] Error reading Timer settings");
         return false;             // nessuna configurazione valida
     }
 
-    prefs.getBytes("config", &config, sizeof(config));
+    prefs.getBytes("config", &configTimer, sizeof(configTimer));
 
     prefs.end();
 

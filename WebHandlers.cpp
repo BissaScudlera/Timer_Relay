@@ -22,33 +22,45 @@ void gestisciStop()
     server.send(303);
 }
 
-void gestisciSalvaCfg()
-{
-    for (int i = 0; i < RELAY_NUMBER; i++)
+void readTimerConfigFromRequest(){
+	for (int i = 0; i < RELAY_NUMBER; i++)
     {
-        config.relayEnableMask[i] = server.hasArg("r" + String(i));
+        configTimer.relayEnableMask[i] = server.hasArg("r" + String(i));
     }
 
     for (int i = 0; i < 7; i++)
     {
-        config.dayEnableMask[i] = server.hasArg("d" + String(i));
+        configTimer.dayEnableMask[i] = server.hasArg("d" + String(i));
     }
 
     if (server.hasArg("durata"))
     {
         unsigned long d = server.arg("durata").toInt();
-        if (d > 0) config.relayDuration = d;
+        if (d > 0) configTimer.relayDuration = d;
     }
 
     if (server.hasArg("orario"))
     {
         String t = server.arg("orario");
-        config.startHour = t.substring(0,2).toInt();
-        config.startMinute = t.substring(3,5).toInt();
-        config.startSecond = 0;
+        configTimer.startHour = t.substring(0,2).toInt();
+        configTimer.startMinute = t.substring(3,5).toInt();
+        configTimer.startSecond = 0;
     }
+}
 
-    server.sendHeader("Location", "/");
+void gestisciSalvaCfg()
+{
+    readTimerConfigFromRequest();
+    server.sendHeader("Location", "/config?saved=1");
+    server.send(303);
+}
+
+void gestisciSalvaCfgEEPROM()
+{
+	readTimerConfigFromRequest();
+	saveConfigTimer();
+	DBG_PRINTLN("[CFG] Saved timer config to EEPROM");
+    server.sendHeader("Location", "/config?saved=1");
     server.send(303);
 }
 
@@ -73,40 +85,43 @@ void gestisciSalvaRTC()
     server.send(303);
 }
 
-
-void gestisciSalvaWiFi()
-{
-    if(server.hasArg("ssid") && server.hasArg("password"))
+void readWifiConfigFromRequest(){
+	if(server.hasArg("ssid") && server.hasArg("password"))
     {
         String nuovoSSID = server.arg("ssid");
         String nuovaPassword = server.arg("password");
 
         if(nuovoSSID.length() > 0 && nuovaPassword.length() >= 8)
         {
-            Wifi_ssid = strdup(nuovoSSID.c_str());
-            Wifi_password = strdup(nuovaPassword.c_str());
+            strlcpy(configWifi.ssid, nuovoSSID.c_str(), sizeof(configWifi.ssid));
+            strlcpy(configWifi.pswd, nuovaPassword.c_str(), sizeof(configWifi.pswd));
+
+            //Wifi_ssid = configWifi.ssid;
+            //Wifi_password = configWifi.pswd;
 
             WiFi.softAPdisconnect(true);
             delay(100);
-            WiFi.softAP(Wifi_ssid, Wifi_password);
+            WiFi.softAP(configWifi.ssid, configWifi.pswd);
         }
     }
+}
 
-    server.sendHeader("Location", "/");
+void gestisciSalvaWiFi()
+{
+    readWifiConfigFromRequest();
+    server.sendHeader("Location", "/setupWiFi?saved=1");
     server.send(303);
 }
 
 
 void gestisciSalvaWiFiEEPROM()
 {
-    
-    // Salvataggio permanente configurazione WiFi su NVS.
-    // Parametri previsti:
-    // - SSID
-    // - password
-    // - configurazione rete AP
-    //
-    // Attualmente la configurazione WiFi resta solo in memoria volatile.
+    readWifiConfigFromRequest();
+	// Salvataggio permanente configurazione WiFi su NVS.
+	saveConfigWifi();
+	DBG_PRINTLN("[CFG] Saved Wifi config to EEPROM");
+    server.sendHeader("Location", "/setupWiFi?saved=1");
+    server.send(303);
 }
 
 #endif

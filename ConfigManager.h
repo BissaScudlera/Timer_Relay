@@ -7,7 +7,7 @@
 
 #define RELAY_NUMBER 20
 
-struct Config
+struct ConfigT
 {
 	//Active time per relay in seconds
 	unsigned long relayDuration;
@@ -24,9 +24,9 @@ struct Config
     uint8_t startSecond;
 };
 
-extern Config config;
+extern ConfigT configTimer;
 
-bool saveConfig();
-bool loadConfig();
+bool saveConfigTimer();
+bool loadConfigTimer();
 
 #endif

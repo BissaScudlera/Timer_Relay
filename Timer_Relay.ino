@@ -21,8 +21,10 @@
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP32)
   // ESP32 DevKit V1 configuration
   #include "HttpServer.h"
-  const int iTriggerButton = 4;  // PIN D4: Manual Sequence Start, debounced push button
-  const int iResetButton   = 5;  // PIN D5: stops active sequence, long press to toggle wifi
+  const int iTriggerButton = 4;  // PIN D4:  Manual Sequence Start, debounced push button
+  const int iResetButton   = 5;  // PIN D5:  stops active sequence, long press to toggle wifi
+  const int iFactoryReset  = 18; // PIN D18: stops loading parameters from NVM and overrides them with Source code defaults
+  const int iDBG_SETUP     = 19; // PIN D19: pauses the program after setup(), waits for serial input.
   const int oLedDebug      = LED_BUILTIN; // Uses ESP32 native built-in LED (GPIO 2)
   const unsigned long SERIAL_BAUD = 115200; // Recommended baud rate for ESP32
 #else
@@ -90,8 +92,10 @@ void setup() {
   pinMode(oLedDebug, OUTPUT);
   pinMode(iTriggerButton, INPUT_PULLUP);
   pinMode(iResetButton, INPUT_PULLUP);
+  pinMode(iFactoryReset, INPUT_PULLUP);
+  pinMode(iDBG_SETUP, INPUT_PULLUP);
 
-  // Evaluate status configurations from hardware strapping pins
+  checkJumpers();
 
   // Clear memory registers for all output elements
   memset(relay, LOW, sizeof(relay));
@@ -116,6 +120,11 @@ void setup() {
     DBG_PRINTLN(MCP1_ENABLE);
     DBG_PRINT("[CFG] MCP2_ENABLE: ");
     DBG_PRINTLN(MCP2_ENABLE);
+    DBG_PRINT("[CFG] Restore Defaults: ");
+    DBG_PRINTLN(FactoryReset);
+    DBG_PRINT("[CFG] Setup serial pause: ");
+    DBG_PRINTLN(DBG_SETUP);
+	DBG_PRINT("\n\r\n\r");
   #endif
 
   // Conditional I2C interface hardware setup
@@ -157,23 +166,56 @@ void setup() {
     rtc.disableAlarm(2);
     rtc.writeSqwPinMode(DS3231_OFF);
   }
-  //Load saved configurations
-  if (!loadConfig()){
-	  DBG_PRINTLN("[CFG] Failed to load preferencies from memory");
-	  saveConfig();
+  
+  // Initialize timer configuration
+  if (FactoryReset)
+  {
+      DBG_PRINTLN("[CFG] Factory Reset: using default Timer settings");
+      saveConfigTimer();      // Save defaults from source code
+  }
+  else
+  {
+      if (!loadConfigTimer())
+      {
+          DBG_PRINTLN("[CFG] Invalid Timer configuration, restoring defaults");
+          saveConfigTimer();
+      }
   }
   
   
   #ifdef WEB_SERVER_H
-    //WiFi AP credentials
+    // Initialize WiFi configuration
+    if (FactoryReset)
+    {
+        DBG_PRINTLN("[CFG] Factory Reset: using default WiFi settings");
+    
+        strlcpy(configWifi.ssid, AP_SSID, sizeof(configWifi.ssid));
+        strlcpy(configWifi.pswd, AP_PWD, sizeof(configWifi.pswd));
+    
+        saveConfigWifi();
+    }
+    else
+    {
+        if (!loadConfigWifi())
+        {
+            DBG_PRINTLN("[CFG] Invalid WiFi configuration, restoring defaults");
+    
+            strlcpy(configWifi.ssid, AP_SSID, sizeof(configWifi.ssid));
+            strlcpy(configWifi.pswd, AP_PWD, sizeof(configWifi.pswd));
+    
+            saveConfigWifi();
+        }
+    }
     serverSetup();
   #endif
 
   DBG_PRINT("\r\n\[SYS] Setup errors: ");
   DBG_PRINTLN(ErrState);
-  #if DBG_SETUP
+  #if DEBUG
+  if (DBG_SETUP){
     ErrState = 0;
     serialPause();
+  }
   #endif
   DBG_PRINT("\033[92m"); //Terminal text color
   DBG_PRINT("\033[44m"); //Terminal background color
@@ -202,6 +244,7 @@ void loop() {
 	*/
     rtcUpdate();
     previousMillis = currentMillis; 
+	checkJumpers();
     // Handle I2C peripheral hardware bus errors (AVR architecture only)
     #if !defined(_ESP32_BUS)
       if (Wire.getWireTimeoutFlag()) {
@@ -266,7 +309,11 @@ void loop() {
   }
 }
 
-
+void checkJumpers(){
+  // Evaluate status configurations from hardware strapping pins
+  FactoryReset= !digitalRead(iFactoryReset);
+  DBG_SETUP= !digitalRead(iDBG_SETUP);
+}
 
 void checkManualTrigger() {
   int reading = digitalRead(iTriggerButton);
@@ -364,14 +411,14 @@ void SerialMonitor(){
 
   // Format scheduling metrics
   Serial.print("\n\rTarget Time: [");
-  if(config.startHour < 10) Serial.print('0'); Serial.print(config.startHour); Serial.print(':');
-  if(config.startMinute < 10) Serial.print('0'); Serial.print(config.startMinute); Serial.print(':');
-  if(config.startSecond < 10) Serial.print('0'); Serial.print(config.startSecond);
+  if(configTimer.startHour < 10) Serial.print('0'); Serial.print(configTimer.startHour); Serial.print(':');
+  if(configTimer.startMinute < 10) Serial.print('0'); Serial.print(configTimer.startMinute); Serial.print(':');
+  if(configTimer.startSecond < 10) Serial.print('0'); Serial.print(configTimer.startSecond);
   Serial.println("]");
   
   Serial.print("Enabled Days: ["); /*------------------------------------------------------------*/
   for(int i = 0; i < 7; i++) {
-    if (config.dayEnableMask[i]) {
+    if (configTimer.dayEnableMask[i]) {
       Serial.print(shortDays[i]); 
     } else {
       Serial.print("--");         
@@ -382,7 +429,7 @@ void SerialMonitor(){
 
   Serial.print("Enabled Relays: ["); /*------------------------------------------------------------*/
   for(int i = 0; i < RELAY_NUMBER; i++) { 
-    Serial.print(config.relayEnableMask[i] ? '1' : '0');  
+    Serial.print(configTimer.relayEnableMask[i] ? '1' : '0');  
     if (((i + 1) % 8 == 0) && (i + 1 < RELAY_NUMBER)){
         Serial.print(' ');   // Space after every bank of 8, except after the last one
         }
@@ -448,7 +495,9 @@ void SerialMonitor(){
   
   // various inputs debug output, to be removed
   Serial.print("Misc Inputs: ");
-  Serial.print("Start(");
+  Serial.print("Factory Reset(");
+  Serial.print(FactoryReset);
+  Serial.print(") Start(");
   Serial.print(lastTrigState);
   Serial.print(") Stop (");
   Serial.print(lastResetStatus);
@@ -564,7 +613,7 @@ String generaHtmlRele() {
   String html = "";
   for(int i = 0; i < RELAY_NUMBER; i++) {
     html += "<div class='toggle-container'><span>V" + String(i+1) + "</span><label class='switch'>";
-    html += "<input type='checkbox' name='r" + String(i) + "' value='1'" + (config.relayEnableMask[i] ? " checked" : "") + ">";
+    html += "<input type='checkbox' name='r" + String(i) + "' value='1'" + (configTimer.relayEnableMask[i] ? " checked" : "") + ">";
     html += "<span class='slider'></span></label></div>";
   }
   return html;
@@ -573,7 +622,7 @@ String generaHtmlGiorni() {
   String html = "";
   for(int i = 0; i < 7; i++) {
     html += "<div class='toggle-container'><span>" + String(shortDays[i]) + "</span><label class='switch'>";
-    html += "<input type='checkbox' name='d" + String(i) + "' value='1'" + (config.dayEnableMask[i] ? " checked" : "") + ">";
+    html += "<input type='checkbox' name='d" + String(i) + "' value='1'" + (configTimer.dayEnableMask[i] ? " checked" : "") + ">";
     html += "<span class='slider'></span></label></div>";
   }
   return html;

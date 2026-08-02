@@ -14,6 +14,7 @@
 static String paginaInizio(const String& titolo)
 {
     String html;
+    html.reserve(12000);
     html += "<!DOCTYPE html><html><head>";
     html += "<meta name='viewport' content='width=device-width,initial-scale=1'>";
     html += "<title>" + titolo + "</title>";
@@ -75,7 +76,7 @@ static String tabellaRelay()
         s += "<input class='toggle' type='checkbox' name='r";
         s += String(i);
         s += "'";
-        if(config.relayEnableMask[i])
+        if(configTimer.relayEnableMask[i])
             s += " checked";
         s += ">";
 
@@ -104,7 +105,7 @@ static String giorniAbilitati()
 
     for(int i=1;i<=7;i++)  //cycle executed from 1 to 7
     {
-        if(config.dayEnableMask[i%7])  //modulo 7 (7%7=0)
+        if(configTimer.dayEnableMask[i%7])  //modulo 7 (7%7=0)
         {
             if(s.length())
                 s += " - ";
@@ -155,16 +156,16 @@ void gestisciRoot()
 
     html += "<div class='card'><h2>Programma</h2>";
     html += "Ora avvio: ";
-    if(config.startHour < 10) html += "0";
-    html += String(config.startHour);
+    if(configTimer.startHour < 10) html += "0";
+    html += String(configTimer.startHour);
     html += ":";
-    if(config.startMinute < 10) html += "0";
-    html += String(config.startMinute);
+    if(configTimer.startMinute < 10) html += "0";
+    html += String(configTimer.startMinute);
     html += "<br>Giorni: ";
     html += giorniAbilitati();
     html += "<br>";
     html += "<br>Durata step: ";
-    html += String(formatCountTime(config.relayDuration));
+    html += String(formatCountTime(configTimer.relayDuration));
 	html += "<br>Durata programma: ";
 	html += formatCountTime(relayProgramDurationSeconds());
     html += "</div>";
@@ -197,7 +198,7 @@ void gestisciComandi()
     html += "<br>";
     html += String(formatCountTime(relayElapsedSeconds()));
     html += "  / ";
-    html += String(formatCountTime(config.relayDuration));
+    html += String(formatCountTime(configTimer.relayDuration));
     html += " </div>";
 
     html += "</body></html>";
@@ -224,7 +225,7 @@ static String giorniEditabili()
         h+=String(day);
         h+="'";
 		
-        if(config.dayEnableMask[day]) {
+        if(configTimer.dayEnableMask[day]) {
 			h+=" checked";
 		}
 		
@@ -237,23 +238,26 @@ static String giorniEditabili()
 void gestisciConfigurazione()
 {
     String html = paginaInizio("Configurazione");
+    if (server.hasArg("saved"))
+    {
+      html += "<div class='ok'>Configuration saved successfully.</div>";
+    }
 
     html += "<div class='card'>";
-    html += "<form action='/salva-cfg' method='POST'>";
-    html += "<button>SALVA</button>";
-
+	html += "<form method='POST'>";
+	
     html += "<h3>Orario partenza</h3>";
     html += "<input type='time' name='orario' value='";
-    if(config.startHour < 10) html += "0";
-    html += String(config.startHour);
+    if(configTimer.startHour < 10) html += "0";
+    html += String(configTimer.startHour);
     html += ":";
-    if(config.startMinute < 10) html += "0";
-    html += String(config.startMinute);
+    if(configTimer.startMinute < 10) html += "0";
+    html += String(configTimer.startMinute);
     html += "'>";
 
     html += "<h3>Durata step [s]</h3>";
     html += "<input name='durata' value='";
-    html += String(config.relayDuration);
+    html += String(configTimer.relayDuration);
     html += "'>";
 
     html += "<h3>Giorni abilitati</h3>";
@@ -261,9 +265,22 @@ void gestisciConfigurazione()
 
     html += "<h3>Valvole abilitate</h3>";
     html += tabellaRelay();
-
-    html += "</form></div>";
-
+	
+	html += "<br><br>";
+    
+    #if DEBUG
+    html += "<button type='submit' formaction='/salva-cfg'>";
+    html += "SALVA TEMP";
+    html += "</button>";
+    #endif
+    
+    html += "&nbsp;";
+    
+    html += "<button type='submit' formaction='/salva-cfg-eeprom'>";
+    html += "SALVA EEPROM";
+    html += "</button>";   
+	
+	html += "</form></div>";
     html += "</body></html>";
 
     server.send(200,"text/html",html);
@@ -363,15 +380,18 @@ void gestisciSetupRTC()
 void gestisciSetupWiFi()
 {
     String html = paginaInizio("Setup WiFi");
-
+    if (server.hasArg("saved"))
+    {
+      html += "<div class='ok'>Configuration saved successfully.</div>";
+    }
+	
     html += "<div class='card'>";
     html += "<h2>Setup WiFi</h2>";
-
-    html += "<form method='POST' action='/salva-wifi'>";
-
+	
+    html += "<form method='POST'>";
     html += "SSID:<br>";
     html += "<input type='text' name='ssid' value='";
-    html += Wifi_ssid;
+    html += configWifi.ssid;
     html += "'><br>";
 
     html += "Password:<br>";
@@ -385,8 +405,15 @@ void gestisciSetupWiFi()
     html += WiFi.softAPSubnetMask().toString();
     html += "<br><br>";
 
-    html += "<button type='submit'>SALVA WIFI</button>";
-    html += "<br><button disabled>SALVA SU EEPROM</button>";
+    html += "<button type='submit' formaction='/salva-wifi'>";
+    html += "SALVA TEMP";
+    html += "</button>";
+    
+    html += "&nbsp;";
+    
+    html += "<button type='submit' formaction='/salva-wifi-eeprom'>";
+    html += "SALVA EEPROM";
+    html += "</button>";
 
     html += "</form>";
     html += "</div>";

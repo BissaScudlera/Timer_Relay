@@ -8,6 +8,7 @@ void gestisciStop();
 void gestisciSalvaDurata();
 void gestisciSalvaOra();
 void gestisciSalvaCfg();
+void gestisciSalvaCfgEEPROM();
 
 void gestisciSalvaRTC();
 void gestisciSalvaWiFi();

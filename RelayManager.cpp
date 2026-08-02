@@ -67,10 +67,10 @@ uint32_t relayRemainingSeconds()
 {
     uint32_t elapsed = relayElapsedSeconds();
 
-    if (elapsed >= config.relayDuration)
+    if (elapsed >= configTimer.relayDuration)
         return 0;
 
-    return config.relayDuration - elapsed;
+    return configTimer.relayDuration - elapsed;
 }
 
 uint32_t relayProgramDurationSeconds()
@@ -79,11 +79,11 @@ uint32_t relayProgramDurationSeconds()
 
     for (uint8_t i = 0; i < RELAY_NUMBER; i++)
     {
-        if (config.relayEnableMask[i])
+        if (configTimer.relayEnableMask[i])
             activeRelays++;
     }
 
-    return activeRelays * config.relayDuration;
+    return activeRelays * configTimer.relayDuration;
 }
 
 void runTimedSequence()
@@ -91,10 +91,10 @@ void runTimedSequence()
     if (state == RelayState::Idle)
     {
 		DBG_PRINTLN("[relay manager] timed sequence: IDLE");
-        if (config.dayEnableMask[now.dayOfTheWeek()] &&
-            now.hour() == config.startHour &&
-            now.minute() == config.startMinute &&
-            now.second() == config.startSecond)
+        if (configTimer.dayEnableMask[now.dayOfTheWeek()] &&
+            now.hour() == configTimer.startHour &&
+            now.minute() == configTimer.startMinute &&
+            now.second() == configTimer.startSecond)
         {
             state = RelayState::Starting;
         }
@@ -117,7 +117,7 @@ void runTimedSequence()
     if (state == RelayState::Starting)
     {
 		DBG_PRINTLN("[relay manager] timed sequence: STARTING");
-        if (config.relayDuration == 0) {
+        if (configTimer.relayDuration == 0) {
           state = RelayState::Finished;
           currentRelayIndex = 0;
           relayStartMs = 0;
@@ -131,7 +131,7 @@ void runTimedSequence()
         relayStartMs = 0;
 
         while (currentRelayIndex < RELAY_NUMBER &&
-               !config.relayEnableMask[currentRelayIndex])
+               !configTimer.relayEnableMask[currentRelayIndex])
         {
             currentRelayIndex++;
         }
@@ -155,7 +155,7 @@ void runTimedSequence()
 	}
     DBG_PRINTLN("[relay manager] timed sequence: RUNNING");
 	
-    if ((nowMs() - relayStartMs) < (config.relayDuration * 1000UL))
+    if ((nowMs() - relayStartMs) < (configTimer.relayDuration * 1000UL))
         return;
 
     relay[currentRelayIndex] = LOW;
@@ -165,7 +165,7 @@ void runTimedSequence()
         currentRelayIndex++;
     }
     while (currentRelayIndex < RELAY_NUMBER &&
-           !config.relayEnableMask[currentRelayIndex]);
+           !configTimer.relayEnableMask[currentRelayIndex]);
 
     if (currentRelayIndex < RELAY_NUMBER)
     {

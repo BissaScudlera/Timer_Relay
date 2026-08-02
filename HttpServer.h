@@ -12,6 +12,8 @@
 
 #include "WebPages.h"
 #include "WebHandlers.h"
+
+#include <Preferences.h>
 #include "wifi_config.h"
 
 //---------------------------------------------------------------------------
@@ -20,8 +22,16 @@
 
 extern WebServer server;
 
-extern const char* Wifi_ssid;
-extern const char* Wifi_password;
+//extern const char* Wifi_ssid;
+//extern const char* Wifi_password;
+struct ConfigW
+{
+  char ssid[33];
+  char pswd[65];
+};
+
+extern ConfigW configWifi;
+
 
 extern bool webServerAttivo;
 
@@ -34,6 +44,11 @@ void toggleWebServer();
 void serverSetup();
 
 void serverLoop();
+
+
+bool saveConfigWifi();
+bool loadConfigWifi();
+
 
 #endif
 

@@ -1,5 +1,9 @@
 #include "Globals.h"
 
+//configuration flags and HW inputs
+//#define DEBUG 1
+bool DBG_SETUP= false;
+bool FactoryReset= false;
 
 bool relay[RELAY_NUMBER];
 int currentRelayIndex=0;
