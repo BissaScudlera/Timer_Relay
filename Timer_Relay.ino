@@ -14,25 +14,24 @@
 #include "DeviceStatus.h"
 #include "RTCManager.h"
 #include "I2CManager.h"
-
 #include "RelayManager.h"
+#include "HttpServer.h"
 
 // Architecture-specific I/O and communication settings----------------------------------
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP32)
   // ESP32 DevKit V1 configuration
-  #include "HttpServer.h"
+  const unsigned long SERIAL_BAUD = 115200; // Recommended baud rate for ESP32: 115200
+  
   const int iTriggerButton = 4;  // PIN D4:  Manual Sequence Start, debounced push button
-  const int iResetButton   = 5;  // PIN D5:  stops active sequence, long press to toggle wifi
+  const int pTriggerButton = 7;  // MCP2.PortA.p7: alternate Manual Sequence Start
+  
+  const int iResetButton   = 5;  // PIN D5:  Manual Sequence Stop, long press to toggle wifi
+  const int pResetButton   = 6;  // MCP2.PortA.p6: alternate Manual Sequence Stop
+  
   const int iFactoryReset  = 18; // PIN D18: stops loading parameters from NVM and overrides them with Source code defaults
   const int iDBG_SETUP     = 19; // PIN D19: pauses the program after setup(), waits for serial input.
+  
   const int oLedDebug      = LED_BUILTIN; // Uses ESP32 native built-in LED (GPIO 2)
-  const unsigned long SERIAL_BAUD = 115200; // Recommended baud rate for ESP32: 115200
-#else
-  // Arduino Nano configuration
-  const int iTriggerButton = 2;  // PIN D2: Manual Sequence Start, debounced push button 
-  const int iResetButton   = 5;  // PIN D5: stops active sequence
-  const int oLedDebug      = LED_BUILTIN; // Uses Nano native built-in LED (Pin 13)
-  const unsigned long SERIAL_BAUD = 9600;
 #endif
 //---------------------------------------------------------------------------------------
 
@@ -56,10 +55,12 @@ uint32_t previousMillis;
 
 
 // Hardware input debounce filters
+bool ManualStart;
 bool lastTrigState = HIGH;              // Default idle high due to internal pull-up
 unsigned long lastDebounceTime = 0;      // Transient timer snapshot
 const unsigned long debounceDelay = 50;  // Settling threshold interval
 
+bool ManualStop;
 unsigned long t_iReset = 0;                  // Stores the millisecond timestamp when pressing starts
 bool lastResetStatus = false;                // Tracking flag for the button state
 const unsigned long T_iResetLong = 5000;     // Threshold for long press action (3 seconds)
@@ -69,8 +70,9 @@ const unsigned long T_iResetShort = 50;      // Minimum debounce threshold for s
 // Forward function declarations------------------------------------------------------------------
 
 void runTimedSequence();
-void checkManualTrigger();
-void checkResetButton();
+void readInputs();
+void checkManualTrigger(int value);
+void checkResetButton(int value);
 bool DeviceAlive(byte Address, const char* Name);
 //void RelayTest();
 void printBin8();
@@ -97,8 +99,11 @@ void setup() {
 
   checkJumpers();
 
-  // Clear memory registers for all output elements
+  // Clear memory registers for all I/O elements
   memset(relay, LOW, sizeof(relay));
+  BankD=0;
+  ManualStart= LOW;
+  ManualStop= LOW;
 
   // Initialize hardware serial console
   #if DEBUG
@@ -143,10 +148,10 @@ void setup() {
     mcp2.writeRegister(MCP23017Register::OLAT_B, 0xFF);  // Purge/Reset internal latch register B, prevents initialization glitch
     mcp2.portMode(MCP23017Port::A, 0b11111111); // Define Port A banks as digital input channels
     mcp2.portMode(MCP23017Port::B, 0); // Define Port B banks as digital output channels
-	//input bank options
+	  //input bank options
 	  mcp2.writeRegister(MCP23017Register::GPPU_A, 0xFF);   //Internal pull-up enabled on Port A
-    mcp2.writeRegister(MCP23017Register::IPOL_A, 0x00);   //Same logic as the input pins state
-    //mcp.writeRegister(MCP23017Register::IPOL_A, 0xFF);  // Uncomment this line to invert inputs
+    //mcp2.writeRegister(MCP23017Register::IPOL_A, 0x00);   //Same logic as the input pins state
+    mcp2.writeRegister(MCP23017Register::IPOL_A, 0xFF);  // Uncomment this line to invert inputs
   }
   
   // Validate real-time clock operational status
@@ -227,9 +232,12 @@ void loop() {
   #ifdef WEB_SERVER_H
     serverLoop();
   #endif
-
-  checkManualTrigger();
-  checkResetButton();
+  
+  
+	//checkJumpers();
+  readInputs();
+  //checkManualTrigger();
+  //checkResetButton();
 
   // Primary execution block triggered exactly once per second
   if (currentMillis - previousMillis >= 1000) {
@@ -241,10 +249,10 @@ void loop() {
         rtcRecover();
       }
     }
-	*/
+	*/ 
     rtcUpdate();
-    previousMillis = currentMillis; 
-	checkJumpers();
+    previousMillis = currentMillis;
+    
     // Handle I2C peripheral hardware bus errors (AVR architecture only)
     #if !defined(_ESP32_BUS)
       if (Wire.getWireTimeoutFlag()) {
@@ -286,14 +294,14 @@ void loop() {
 	BankB= ~BankB;
 	BankC= ~BankC;
 
-    // Refresh current states across physical peripheral devices
+    // Write Digital Outputs
     if (MCP1_ENABLE && DeviceAlive(MCP1_ADR,"Relay Interface 1")){
       mcp1.writePort(MCP23017Port::A, BankA);
       mcp1.writePort(MCP23017Port::B, BankB);
     }
 	if (MCP2_ENABLE && DeviceAlive(MCP2_ADR,"Relay Interface 2")){
       mcp2.writePort(MCP23017Port::B, BankC);
-      BankD = mcp2.readPort(MCP23017Port::A);
+      //BankD = mcp2.readPort(MCP23017Port::A);
     }
     if (ErrState != 0){
       digitalWrite(oLedDebug, HIGH);
@@ -310,14 +318,30 @@ void loop() {
 }
 
 void checkJumpers(){
-  // Evaluate status configurations from hardware strapping pins
+  // Evaluate status configurations on startup, from hardware strapping pins
   FactoryReset= !digitalRead(iFactoryReset);
   DBG_SETUP= !digitalRead(iDBG_SETUP);
 }
 
-void checkManualTrigger() {
-  int reading = digitalRead(iTriggerButton);
+inline bool bufferRead(uint8_t bit)
+{
+    return (BankD & (1 << bit));
+}
 
+void readInputs(){
+	
+	if (MCP2_ENABLE )// && DeviceAlive(MCP2_ADR,"Relay Interface 2"))
+      BankD = mcp2.readPort(MCP23017Port::A);  //Read I2C digital inputs
+  
+	ManualStart= ( !digitalRead(iTriggerButton) || bufferRead(pTriggerButton) );
+	checkManualTrigger( ManualStart );
+	
+    ManualStop= ( !digitalRead(iResetButton)  || bufferRead(pResetButton) );
+	checkResetButton( ManualStop );
+   }
+
+void checkManualTrigger(bool reading) {
+	
   if (reading != lastTrigState) {
     lastDebounceTime = millis();
     lastTrigState = reading;
@@ -325,18 +349,16 @@ void checkManualTrigger() {
 
   if ((millis() - lastDebounceTime) > debounceDelay) {
     // Assert active sequence status if edge requirements evaluate true
-    if (reading == LOW && !relayRunning()) {
+    if (reading == HIGH && !relayRunning()) {
       relayStart(); 
     }
   }
 }
 
-void checkResetButton() {
+void checkResetButton(bool actStatus) {
   static bool longPressHandled = false;
 
-  int actStatus = digitalRead(iResetButton);
-
-  if (actStatus == LOW) {
+  if (actStatus == HIGH) {
     if (!lastResetStatus) {
       t_iReset = millis();
       lastResetStatus = true;
@@ -344,12 +366,12 @@ void checkResetButton() {
     }
 
     if (!longPressHandled && (millis() - t_iReset >= T_iResetLong)) {
+	  DBG_PRINTLN("[I/O] Long Press: Toggle WebServer.");
       longPressHandled = true;
       lastResetStatus = false;
-
-#if defined(ARDUINO_ARCH_ESP32) || defined(ESP32)
-      toggleWebServer();
-#endif
+      #if defined(ARDUINO_ARCH_ESP32) || defined(ESP32)
+        toggleWebServer();
+      #endif
     }
   }
   else {
@@ -363,7 +385,7 @@ void checkResetButton() {
           for (int i = 0; i < RELAY_NUMBER; i++) {
             relay[i] = LOW;
           }
-          DBG_PRINTLN("[HARDWARE] Short Press: Relay sequence RESET.");
+          DBG_PRINTLN("[I/O] Short Press: Relay sequence RESET.");
         }
       }
     }
@@ -500,9 +522,9 @@ void SerialMonitor(){
   Serial.print(") PowerOn Pause(");
   Serial.print(DBG_SETUP);
   Serial.print(") Start(");
-  Serial.print(lastTrigState);
+  Serial.print(ManualStart);
   Serial.print(") Stop (");
-  Serial.print(lastResetStatus);
+  Serial.print(ManualStop);
   Serial.println(")");
 	
 

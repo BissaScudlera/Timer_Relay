@@ -9,7 +9,7 @@
 
 #define FW_MAJOR           1
 #define FW_MINOR           9
-#define FW_PATCH           3
+#define FW_PATCH           5
 
 // Incrementare ad ogni compilazione ufficiale
 #define FW_BUILD           1
