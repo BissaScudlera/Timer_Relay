@@ -85,6 +85,8 @@ void serverSetup()
         server.on("/sistema",       gestisciSistema);
         server.on("/setupRTC",      gestisciSetupRTC);
         server.on("/setupWiFi",     gestisciSetupWiFi);
+		
+		server.on("/help", HTTP_GET, gestisciHelp);
 
         server.on("/start", HTTP_POST, gestisciStart);
         server.on("/stop", HTTP_POST, gestisciStop);

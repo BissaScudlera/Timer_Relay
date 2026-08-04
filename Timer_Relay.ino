@@ -52,7 +52,8 @@ uint32_t previousMillis;
 //const char* shortDays[7] = {"Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};
 
 // MCP23017 I2C Port Expander configurations
-
+bool MCP1_ON = false; //used in read inputs to avoid generating too much error messages
+bool MCP2_ON = false;
 
 // Hardware input debounce filters
 bool ManualStart;
@@ -138,12 +139,14 @@ void setup() {
 
   // Configure MCP23017 GPIO data direction registers
   if (MCP1_ENABLE && DeviceAlive(MCP1_ADR,"Relay Interface 1")){
+	MCP1_ON = true;
     mcp1.writeRegister(MCP23017Register::OLAT_A, 0xFF);  // Purge/Reset internal latch register A, prevents initialization glitch
     mcp1.writeRegister(MCP23017Register::OLAT_B, 0xFF);  // Purge/Reset internal latch register B, prevents initialization glitch
     mcp1.portMode(MCP23017Port::A, 0); // Define Port A banks as digital output channels
     mcp1.portMode(MCP23017Port::B, 0); // Define Port B banks as digital output channels
   }
   if (MCP2_ENABLE && DeviceAlive(MCP2_ADR,"Relay Interface 2")){
+	MCP2_ON = true;
     mcp2.writeRegister(MCP23017Register::OLAT_A, 0xFF);  // Purge/Reset internal latch register A, prevents initialization glitch
     mcp2.writeRegister(MCP23017Register::OLAT_B, 0xFF);  // Purge/Reset internal latch register B, prevents initialization glitch
     mcp2.portMode(MCP23017Port::A, 0b11111111); // Define Port A banks as digital input channels
@@ -296,13 +299,20 @@ void loop() {
 
     // Write Digital Outputs
     if (MCP1_ENABLE && DeviceAlive(MCP1_ADR,"Relay Interface 1")){
+	  MCP1_ON = true;
       mcp1.writePort(MCP23017Port::A, BankA);
       mcp1.writePort(MCP23017Port::B, BankB);
     }
+	else 
+		MCP1_ON = false;
 	if (MCP2_ENABLE && DeviceAlive(MCP2_ADR,"Relay Interface 2")){
+	  MCP2_ON = true;
       mcp2.writePort(MCP23017Port::B, BankC);
       //BankD = mcp2.readPort(MCP23017Port::A);
     }
+	else 
+		MCP2_ON = false;
+	
     if (ErrState != 0){
       digitalWrite(oLedDebug, HIGH);
     }
@@ -330,8 +340,10 @@ inline bool bufferRead(uint8_t bit)
 
 void readInputs(){
 	
-	if (MCP2_ENABLE )// && DeviceAlive(MCP2_ADR,"Relay Interface 2"))
-      BankD = mcp2.readPort(MCP23017Port::A);  //Read I2C digital inputs
+	if (MCP2_ENABLE && MCP2_ON)
+        BankD = mcp2.readPort(MCP23017Port::A);  //Read I2C digital inputs
+	else
+		BankD = 0x00;
   
 	ManualStart= ( !digitalRead(iTriggerButton) || bufferRead(pTriggerButton) );
 	checkManualTrigger( ManualStart );

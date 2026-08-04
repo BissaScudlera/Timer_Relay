@@ -1,7 +1,8 @@
 #include "I2CManager.h"
 #include "RTCManager.h"
 
-const char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+//const char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+const char daysOfTheWeek[7][12] = {"Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"};
 const char* shortDays[7] = {"Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};
 
 static DateTime cachedNow;
@@ -124,49 +125,44 @@ const char* rtcDayString(void)
 }
 
 
-const char* formatCountTime(uint32_t totalSeconds)
+const char* formatCountTime(uint32_t seconds)
 {
-    if (totalSeconds <= 0){
-		return "--";
-	}
-	else{
-	
-	static char buffer[16];
+    static char buffer[24];
 
-    uint32_t hours   = totalSeconds / 3600;
-    uint32_t minutes = (totalSeconds % 3600) / 60;
-    uint32_t seconds = totalSeconds % 60;
+    uint32_t h = seconds / 3600;
+    uint32_t m = (seconds % 3600) / 60;
+    uint32_t s = seconds % 60;
 
-    if (hours > 0)
+    if (h)
     {
-        snprintf(
-            buffer,
-            sizeof(buffer),
-            "%2uh %2lum %2lus",
-            (unsigned long)hours,
-            (unsigned long)minutes,
-            (unsigned long)seconds);
+        if (m)
+        {
+            if (s)
+                snprintf(buffer,sizeof(buffer),"%lu h %lu m %lu s",h,m,s);
+            else
+                snprintf(buffer,sizeof(buffer),"%lu h %lu m",h,m);
+        }
+        else
+        {
+            if (s)
+                snprintf(buffer,sizeof(buffer),"%lu h %lu s",h,s);
+            else
+                snprintf(buffer,sizeof(buffer),"%lu h",h);
+        }
     }
-    else if (minutes > 0)
+    else if (m)
     {
-        snprintf(
-            buffer,
-            sizeof(buffer),
-            "%lum %2lus",
-            (unsigned long)minutes,
-            (unsigned long)seconds);
+        if (s)
+            snprintf(buffer,sizeof(buffer),"%lu m %lu s",m,s);
+        else
+            snprintf(buffer,sizeof(buffer),"%lu m",m);
     }
     else
     {
-        snprintf(
-            buffer,
-            sizeof(buffer),
-            "%lus",
-            (unsigned long)seconds);
+        snprintf(buffer,sizeof(buffer),"%lu s",s);
     }
 
     return buffer;
-	}
 }
 
 

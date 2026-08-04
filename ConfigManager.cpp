@@ -30,7 +30,8 @@ bool saveConfigTimer()
 {
 	Preferences prefs;
 	
-    prefs.begin("timer", false);
+	if (!prefs.begin("timer", false))
+        return false;
 
     size_t written = prefs.putBytes("config", &configTimer, sizeof(configTimer));
 
@@ -43,7 +44,8 @@ bool loadConfigTimer()
 {
 	Preferences prefs;
 	
-    prefs.begin("timer", true);   // sola lettura
+    if (!prefs.begin("timer", true)) // sola lettura
+        return false;   
 
     if (prefs.getBytesLength("config") != sizeof(configTimer))
     {

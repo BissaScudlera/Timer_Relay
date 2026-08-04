@@ -8,6 +8,7 @@
 #include "RelayManager.h"
 #include "HttpServer.h"
 
+
 void gestisciStart()
 {
     relayStart();
@@ -36,6 +37,7 @@ void readTimerConfigFromRequest(){
     if (server.hasArg("durata"))
     {
         unsigned long d = server.arg("durata").toInt();
+		if (!DEBUG) d *= 60;
         if (d > 0) configTimer.relayDuration = d;
     }
 
@@ -51,17 +53,24 @@ void readTimerConfigFromRequest(){
 void gestisciSalvaCfg()
 {
     readTimerConfigFromRequest();
-    server.sendHeader("Location", "/config?saved=1");
+    server.sendHeader("Location", "/?saved=1");
     server.send(303);
 }
 
 void gestisciSalvaCfgEEPROM()
 {
 	readTimerConfigFromRequest();
-	saveConfigTimer();
-	DBG_PRINTLN("[CFG] Saved timer config to EEPROM");
-    server.sendHeader("Location", "/config?saved=1");
-    server.send(303);
+	if (saveConfigTimer()){
+		DBG_PRINTLN("[CFG] Saved timer config to EEPROM");
+		server.sendHeader("Location", "/?saved=1");
+		server.send(303);
+	}
+	else{
+		DBG_PRINTLN("[CFG] Error saving timer config to EEPROM");
+		server.sendHeader("Location", "/?saved=0");
+		server.send(303);
+	}
+		
 }
 
 void gestisciSalvaRTC()

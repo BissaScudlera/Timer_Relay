@@ -9,6 +9,7 @@
 #include "RelayManager.h"
 #include "Diagnostics.h"
 #include "HttpServer.h"
+#include "HelpPage.h"
 #include "Version.h"
 
 static String paginaInizio(const String& titolo)
@@ -34,8 +35,17 @@ static String paginaInizio(const String& titolo)
     html += "<a href='/comandi'><button>Comandi</button></a>";
     html += "<a href='/config'><button>Configurazione</button></a>";
     html += "<a href='/sistema'><button>Sistema</button></a>";
+	html += "<a href='/help'><button>Help</button></a>";
 
     return html;
+}
+void gestisciHelp()
+{
+    String html = paginaInizio("Help");
+    html += HELP_PAGE;
+    html += "</body></html>";
+
+    server.send(200, "text/html", html);
 }
 
 static String listaUsciteAttive()
@@ -128,6 +138,14 @@ void gestisciRoot()
 {
     String html = paginaInizio("Home");
     html += "<meta http-equiv='refresh' content='1'>";
+	
+    if (server.hasArg("saved"))
+    {
+		if (server.arg("saved") == "1")
+			html += "<div class='ok'>Parametri salvati.</div>";
+		else
+			html += "<div class='ko'>Errore: parametri non salvati.</div>";
+    }
 
     html += "<div class='card'><h2>Stato irrigazione</h2>";
     html += relayRunning() ? "ATTIVA" : "FERMA";
@@ -168,7 +186,10 @@ void gestisciRoot()
     html += giorniAbilitati();
     html += "<br>";
     html += "<br>Durata step: ";
-    html += String(formatCountTime(configTimer.relayDuration));
+    if (DEBUG)
+		html += String(formatCountTime(configTimer.relayDuration));
+	else
+		html += String(formatCountTime(configTimer.relayDuration/60));
 	html += "<br>Durata programma: ";
 	html += formatCountTime(relayProgramDurationSeconds());
     html += "</div>";
@@ -209,7 +230,10 @@ void gestisciComandi()
     html += "<br>";
     html += String(formatCountTime(relayElapsedSeconds()));
     html += "  / ";
-    html += String(formatCountTime(configTimer.relayDuration));
+    if (DEBUG)
+		html += String(formatCountTime(configTimer.relayDuration));
+	else
+		html += String(formatCountTime(configTimer.relayDuration/60));
     html += " </div>";
 
     html += "</body></html>";
@@ -249,13 +273,6 @@ static String giorniEditabili()
 void gestisciConfigurazione()
 {
     String html = paginaInizio("Configurazione");
-    if (server.hasArg("saved"))
-    {
-		if (server.arg("saved") == "1")
-			html += "<div class='ok'>Parametri salvati.</div>";
-		else
-			html += "<div class='ko'>Errore: parametri non salvati.</div>";
-    }
 
     html += "<div class='card'>";
 	html += "<form method='POST'>";
@@ -269,9 +286,15 @@ void gestisciConfigurazione()
     html += String(configTimer.startMinute);
     html += "'>";
 
-    html += "<h3>Durata step [s]</h3>";
+    if (DEBUG)
+		html += "<h3>Durata step [s]</h3>";
+	else
+		html += "<h3>Durata step [min]</h3>";
     html += "<input name='durata' value='";
-    html += String(configTimer.relayDuration);
+	if (DEBUG)
+		html += String(configTimer.relayDuration);
+	else
+		html += String(configTimer.relayDuration/60);
     html += "'>";
 
     html += "<h3>Giorni abilitati</h3>";
@@ -309,8 +332,11 @@ void gestisciSistema()
     String html = paginaInizio("Sistema");
     html += "<meta http-equiv='refresh' content='1'>";
 
-    html += "<div class='card'>";
-	
+    #if DEBUG
+    html += "<div class='info'>Debug mode enabled (DEBUG=1)</div>";
+    #endif
+
+    html += "<div class='card'>";	
     //html += "<hr>";
     html += "<a href='/setupRTC'><button>SETUP RTC</button></a>";
     html += "<a href='/setupWiFi'><button>SETUP WIFI</button></a>";
@@ -352,13 +378,13 @@ void gestisciSistema()
     html += "</div>";
 	
     html += "<div class='card'>";
-    html += "<h2>Versione</h2>";
-    html += "SW: ";
-	html += getFirmwareVersion();
-	html += " , ";
-	html += getBuildDate();
+	html += "Firmware version: ";
+    html += getFirmwareVersion();
     html += "<br>";
-    html += "HW: ";
+    html += "Compiled: ";
+    html += getBuildDate();
+    html += "<br>";
+    html += "MCU: ";
 	html += getHardwareName();
     html += "<br>";
 	html += "</div>";
