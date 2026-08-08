@@ -5,7 +5,7 @@
 #include <Preferences.h>
 
 
-#define RELAY_NUMBER 24
+#define RELAY_NUMBER 22
 
 struct ConfigT
 {

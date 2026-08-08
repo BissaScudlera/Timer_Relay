@@ -43,14 +43,14 @@ code{background:#eeeeee;padding:2px 4px}
 <tr><td>1</td><td>GPA1</td><td>Unused</td></tr>
 <tr><td>0</td><td>GPA0</td><td>Unused</td></tr>
 </table>
-<h2>MCP23017 #2 Output Mapping</h2>
+<h2>GP Output Mapping</h2>
 <table>
 <tr><th>BankC Bit</th><th>MCP Pin</th><th>Function</th></tr>
-<!-- RELAY_NUMBER 20 outputs 21-24  not available to timer-->
+<!-- RELAY_NUMBER 22 outputs 23-24  not available to timer-->
 <tr><td>7</td><td>GPB7</td><td>Unused</td></tr>
 <tr><td>6</td><td>GPB6</td><td>Unused</td></tr>
-<tr><td>5</td><td>GPB5</td><td>Unused</td></tr>
-<tr><td>4</td><td>GPB4</td><td>Unused</td></tr>
+<tr><td>5</td><td>GPB5</td><td>IRR22</td></tr>
+<tr><td>4</td><td>GPB4</td><td>IRR21</td></tr>
 <tr><td>3</td><td>GPB3</td><td>IRR20</td></tr>
 <tr><td>2</td><td>GPB2</td><td>IRR19</td></tr>
 <tr><td>1</td><td>GPB1</td><td>IRR18</td></tr>
