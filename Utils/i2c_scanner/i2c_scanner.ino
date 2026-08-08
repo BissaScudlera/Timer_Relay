@@ -32,9 +32,16 @@
  
 void setup()
 {
-  Wire.begin();
+  #if defined(ARDUINO_ARCH_ESP32) || defined(ESP32)
+      const unsigned long SERIAL_BAUD = 115200;
+      Wire.begin(21, 22);
+  #else
+      const unsigned long SERIAL_BAUD = 9600;
+      Wire.begin();
+  #endif
+
  
-  Serial.begin(9600);
+  Serial.begin(SERIAL_BAUD);
   while (!Serial);             // Leonardo: wait for serial monitor
   Serial.println("\nI2C Scanner");
 }

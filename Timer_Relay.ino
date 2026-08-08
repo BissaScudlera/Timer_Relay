@@ -143,18 +143,18 @@ void setup() {
     mcp1.writeRegister(MCP23017Register::OLAT_A, 0xFF);  // Purge/Reset internal latch register A, prevents initialization glitch
     mcp1.writeRegister(MCP23017Register::OLAT_B, 0xFF);  // Purge/Reset internal latch register B, prevents initialization glitch
     mcp1.portMode(MCP23017Port::A, 0); // Define Port A banks as digital output channels
-    mcp1.portMode(MCP23017Port::B, 0); // Define Port B banks as digital output channels
+    mcp1.portMode(MCP23017Port::B, 0b11111111); // Define Port A banks as digital input channels
+	//input bank options
+	mcp1.writeRegister(MCP23017Register::GPPU_B, 0xFF);   //Internal pull-up enabled on Port A
+    //mcp1.writeRegister(MCP23017Register::IPOL_B, 0x00);   //Same logic as the input pins state
+    mcp1.writeRegister(MCP23017Register::IPOL_B, 0xFF);  // Uncomment this line to invert inputs
   }
   if (MCP2_ENABLE && DeviceAlive(MCP2_ADR,"Relay Interface 2")){
 	MCP2_ON = true;
     mcp2.writeRegister(MCP23017Register::OLAT_A, 0xFF);  // Purge/Reset internal latch register A, prevents initialization glitch
     mcp2.writeRegister(MCP23017Register::OLAT_B, 0xFF);  // Purge/Reset internal latch register B, prevents initialization glitch
-    mcp2.portMode(MCP23017Port::A, 0b11111111); // Define Port A banks as digital input channels
+    mcp2.portMode(MCP23017Port::A, 0); // Define Port A banks as digital output channels
     mcp2.portMode(MCP23017Port::B, 0); // Define Port B banks as digital output channels
-	  //input bank options
-	  mcp2.writeRegister(MCP23017Register::GPPU_A, 0xFF);   //Internal pull-up enabled on Port A
-    //mcp2.writeRegister(MCP23017Register::IPOL_A, 0x00);   //Same logic as the input pins state
-    mcp2.writeRegister(MCP23017Register::IPOL_A, 0xFF);  // Uncomment this line to invert inputs
   }
   
   // Validate real-time clock operational status
@@ -294,21 +294,21 @@ void loop() {
     }
 	//invert logic and mirror MCP1-portA (it's upside down on the PCB)
 	BankA= reverseByte(~BankA);
-	BankB= ~BankB;
+	BankB= reverseByte(~BankB);
 	BankC= ~BankC;
 
     // Write Digital Outputs
     if (MCP1_ENABLE && DeviceAlive(MCP1_ADR,"Relay Interface 1")){
 	  MCP1_ON = true;
       mcp1.writePort(MCP23017Port::A, BankA);
-      mcp1.writePort(MCP23017Port::B, BankB);
+      //mcp1.writePort(MCP23017Port::B, BankD);
     }
 	else 
 		MCP1_ON = false;
 	if (MCP2_ENABLE && DeviceAlive(MCP2_ADR,"Relay Interface 2")){
 	  MCP2_ON = true;
-      mcp2.writePort(MCP23017Port::B, BankC);
-      //BankD = mcp2.readPort(MCP23017Port::A);
+      mcp2.writePort(MCP23017Port::B, BankB);
+      mcp2.writePort(MCP23017Port::A, BankC);
     }
 	else 
 		MCP2_ON = false;
@@ -340,8 +340,8 @@ inline bool bufferRead(uint8_t bit)
 
 void readInputs(){
 	
-	if (MCP2_ENABLE && MCP2_ON)
-        BankD = mcp2.readPort(MCP23017Port::A);  //Read I2C digital inputs
+	if (MCP1_ENABLE && MCP1_ON)
+        BankD = mcp1.readPort(MCP23017Port::B);  //Read I2C digital inputs
 	else
 		BankD = 0x00;
   
