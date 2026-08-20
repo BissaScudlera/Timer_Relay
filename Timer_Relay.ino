@@ -164,7 +164,7 @@ void setup() {
   if (!rtcGetStatus().available) {
     DeviceAlive(0x68, "RTC");
     DBG_PRINTLN("[RTC] Setup failed");
-	  rtcStatus.setError(-2, "Setup failed");
+	//rtcStatus.setError(-2, "Setup failed");
   }
   else{
     if (rtc.lostPower()){

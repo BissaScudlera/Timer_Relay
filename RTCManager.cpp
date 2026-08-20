@@ -29,6 +29,7 @@ bool rtcInit(void)
         return false;
     }
 
+    rtcStatus.setError(0);
     return true;
 }
 
