@@ -87,6 +87,16 @@ uint32_t relayProgramDurationSeconds()
 
 void runTimedSequence()
 {
+    if (!rtcStatus.available){
+
+        DBG_PRINTLN("[relay manager] RTC unavailable, timed sequence disabled");
+
+        memset(relay, LOW, sizeof(relay));
+        currentRelayIndex = 0;
+        relayStartMs = 0;
+        state = RelayState::Idle;
+        return;
+    }
     if (state == RelayState::Idle)
     {
 		DBG_PRINTLN("[relay manager] timed sequence: IDLE");

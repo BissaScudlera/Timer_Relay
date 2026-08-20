@@ -22,14 +22,15 @@
   // ESP32 DevKit V1 configuration
   const unsigned long SERIAL_BAUD = 115200; // Recommended baud rate for ESP32: 115200
   
-  const int iTriggerButton = 4;  // PIN D4:  Manual Sequence Start, debounced push button
+  const int iTriggerButton = 32;  // PIN D34:  Manual Sequence Start, debounced push button
   const int pTriggerButton = 7;  // MCP2.PortA.p7: alternate Manual Sequence Start
   
-  const int iResetButton   = 5;  // PIN D5:  Manual Sequence Stop, long press to toggle wifi
+  const int iResetButton   = 33;  // PIN D35:  Manual Sequence Stop
   const int pResetButton   = 6;  // MCP2.PortA.p6: alternate Manual Sequence Stop
   
-  const int iFactoryReset  = 18; // PIN D18: stops loading parameters from NVM and overrides them with Source code defaults
   const int iDBG_SETUP     = 19; // PIN D19: pauses the program after setup(), waits for serial input.
+  const int iFactoryReset  = 18; // PIN D18: stops loading parameters from NVM and overrides them with Source code defaults
+  const int iDisableWiFi   = 5;  // PIN D5:  Disable wifi
   
   const int oLedDebug      = LED_BUILTIN; // Uses ESP32 native built-in LED (GPIO 2)
 #endif
@@ -95,8 +96,9 @@ void setup() {
   pinMode(oLedDebug, OUTPUT);
   pinMode(iTriggerButton, INPUT_PULLUP);
   pinMode(iResetButton, INPUT_PULLUP);
-  pinMode(iFactoryReset, INPUT_PULLUP);
   pinMode(iDBG_SETUP, INPUT_PULLUP);
+  pinMode(iFactoryReset, INPUT_PULLUP);
+  pinMode(iDisableWiFi, INPUT_PULLUP);
 
   checkJumpers();
 
@@ -144,8 +146,8 @@ void setup() {
     mcp1.writeRegister(MCP23017Register::OLAT_B, 0xFF);  // Purge/Reset internal latch register B, prevents initialization glitch
     mcp1.portMode(MCP23017Port::A, 0); // Define Port A banks as digital output channels
     mcp1.portMode(MCP23017Port::B, 0b11111111); // Define Port A banks as digital input channels
-	//input bank options
-	mcp1.writeRegister(MCP23017Register::GPPU_B, 0xFF);   //Internal pull-up enabled on Port A
+	  //input bank options
+	  mcp1.writeRegister(MCP23017Register::GPPU_B, 0xFF);   //Internal pull-up enabled on Port A
     //mcp1.writeRegister(MCP23017Register::IPOL_B, 0x00);   //Same logic as the input pins state
     mcp1.writeRegister(MCP23017Register::IPOL_B, 0xFF);  // Uncomment this line to invert inputs
   }
@@ -162,11 +164,13 @@ void setup() {
   if (!rtcGetStatus().available) {
     DeviceAlive(0x68, "RTC");
     DBG_PRINTLN("[RTC] Setup failed");
+	  rtcStatus.setError(-2, "Setup failed");
   }
   else{
     if (rtc.lostPower()){
       ErrState++;
       DBG_PRINTLN("[RTC] Clock lost power, set the time!");
+	    rtcStatus.setError(-3, "Clock lost power, set the time!");
     }
     // Deactivate hardware auxiliary square wave generation channels
     rtc.disable32K();
@@ -230,7 +234,7 @@ void setup() {
 }
 void loop() {
   currentMillis = millis();
-  yield();; //Prevent ESP32 watchdog triggers by yielding processor time to background routines
+  yield(); //Prevent ESP32 watchdog triggers by yielding processor time to background routines
   
   #ifdef WEB_SERVER_H
     serverLoop();
@@ -244,6 +248,13 @@ void loop() {
 
   // Primary execution block triggered exactly once per second
   if (currentMillis - previousMillis >= 1000) {
+	if (!digitalRead(iDisableWiFi)){
+      turnOnWebServer();
+	}
+	else {
+	    DBG_PRINTLN("[DIP Sw] Turn off WebServer.");
+      turnOffWebServer();
+	}
     /*
 	if (!rtcGetStatus().available)
     {
@@ -254,9 +265,14 @@ void loop() {
     }
 	*/ 
     rtcUpdate();
+    // Query active clock timestamp from hardware rtc element
+    if ( rtcGetStatus().available && DeviceAlive(0x68, "RTC") ){
+      now = rtcNow();
+    }
+    
     previousMillis = currentMillis;
     
-    // Handle I2C peripheral hardware bus errors (AVR architecture only)
+    // Handle I2C peripheral hardware bus errors
     #if !defined(_ESP32_BUS)
       if (Wire.getWireTimeoutFlag()) {
         Wire.clearWireTimeoutFlag();
@@ -264,11 +280,6 @@ void loop() {
         DBG_PRINTLN("[I2C] Bus Timeout");
       }
     #endif
-
-    // Query active clock timestamp from hardware rtc element
-    if ( rtcGetStatus().available && DeviceAlive(0x68, "RTC") ){
-      now = rtcNow();
-    }
 
     // Evaluate automated sequence pipeline cycles
     runTimedSequence();
@@ -297,7 +308,14 @@ void loop() {
 	BankB= reverseByte(~BankB);
 	BankC= ~BankC;
 
-    // Write Digital Outputs
+  // Write Digital Outputs
+  if (ErrState != 0){     //error signal
+    digitalWrite(oLedDebug, HIGH);
+	  BankC &= ~(1 << 7);   // bit 7 = 0 -> uscita attiva
+  }
+	else{
+		BankC |=  (1 << 7);   // bit 7 = 1 -> uscita disattiva
+	}
     if (MCP1_ENABLE && DeviceAlive(MCP1_ADR,"Relay Interface 1")){
 	  MCP1_ON = true;
       mcp1.writePort(MCP23017Port::A, BankA);
@@ -313,9 +331,6 @@ void loop() {
 	else 
 		MCP2_ON = false;
 	
-    if (ErrState != 0){
-      digitalWrite(oLedDebug, HIGH);
-    }
 	delay(1);
     
     // Process diagnostics outputs
@@ -348,7 +363,7 @@ void readInputs(){
 	ManualStart= ( !digitalRead(iTriggerButton) || bufferRead(pTriggerButton) );
 	checkManualTrigger( ManualStart );
 	
-    ManualStop= ( !digitalRead(iResetButton)  || bufferRead(pResetButton) );
+  ManualStop= ( !digitalRead(iResetButton)  || bufferRead(pResetButton) );
 	checkResetButton( ManualStop );
    }
 
@@ -378,12 +393,14 @@ void checkResetButton(bool actStatus) {
     }
 
     if (!longPressHandled && (millis() - t_iReset >= T_iResetLong)) {
-	  DBG_PRINTLN("[I/O] Long Press: Toggle WebServer.");
       longPressHandled = true;
       lastResetStatus = false;
-      #if defined(ARDUINO_ARCH_ESP32) || defined(ESP32)
+      /*
+	  #if defined(ARDUINO_ARCH_ESP32) || defined(ESP32)
+	    DBG_PRINTLN("[I/O] Long Press: Toggle WebServer.");
         toggleWebServer();
       #endif
+	  */
     }
   }
   else {
@@ -418,6 +435,10 @@ void SerialMonitor(){
 
   Serial.print("\n\rSystem Errors: ");
   Serial.println(ErrState);
+  if (!MCP1_ON)
+    Serial.println("MCP1 Off");
+  if (!MCP2_ON)
+    Serial.println("MCP2 Off");
 
   // Format and print current hardware RTC timestamps
   if (DeviceAlive(0x68, "RTC")) {
@@ -504,18 +525,6 @@ void SerialMonitor(){
   printBin8(BankB);
   Serial.print(' ');
   printBin8(reverseByte(BankC));
-/*
-  if(MCP1_ENABLE && DeviceAlive(MCP1_ADR,"Interface 1")){
-	Serial.print("[");
-    printBin8(mcp1.readPort(MCP23017Port::A));
-    Serial.print(' ');
-    printBin8(mcp1.readPort(MCP23017Port::B));
-  }
-  if(MCP2_ENABLE && DeviceAlive(MCP2_ADR,"Interface 2")){
-    Serial.print(' ');
-    printBin8(mcp2.readPort(MCP23017Port::B));
-  }
-*/
   Serial.println("]");
 
   Serial.print("Input HW: [");
@@ -531,8 +540,10 @@ void SerialMonitor(){
   Serial.print("Misc Inputs: ");
   Serial.print("Factory Reset(");
   Serial.print(FactoryReset);
-  Serial.print(") PowerOn Pause(");
+  Serial.print(") Debug(");
   Serial.print(DBG_SETUP);
+  Serial.print(") Wifi Enable(");
+  Serial.print(!digitalRead(iDisableWiFi));
   Serial.print(") Start(");
   Serial.print(ManualStart);
   Serial.print(") Stop (");

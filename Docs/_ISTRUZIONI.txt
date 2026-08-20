@@ -10,12 +10,13 @@ Digital Input:
 
         -pulsante stop
                   pressione rapida: arresta il ciclo di irrigazione corrente
-                  pressione prolungata(5s): -commuta l'accensione dell'AP wifi 
+                  (disattivato)pressione prolungata(5s): -commuta l'accensione dell'AP wifi 
                                             -funzione da abilitare tramite jumper?
 
 jumper di configuazione:
-	-reset impostazioni default (quando attivo al riavvio le impostazioni NVM vengono sovrascritte)
         -debug setup (quando attivo il debug seriale, attende connessione prima di iniziare il Loop()
+                       to do: attiva il debug seriale
+	-reset impostazioni default (quando attivo al riavvio le impostazioni NVM vengono sovrascritte)
         -abilitazione AP (To Do: forza stato accensione AP)
 
 flag compilatore:

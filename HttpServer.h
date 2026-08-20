@@ -14,12 +14,14 @@
 #include "WebHandlers.h"
 
 #include <Preferences.h>
+/*
 #if DEBUG
  #define AP_SSID "ESP32"
  #define AP_PWD  "12345678"
 #else
  #include "wifi_config.h"
 #endif
+*/ #include "wifi_config.h"
 
 //---------------------------------------------------------------------------
 // Oggetti globali del WebServer
@@ -43,7 +45,8 @@ extern bool webServerAttivo;
 //---------------------------------------------------------------------------
 // API pubblica
 //---------------------------------------------------------------------------
-
+void turnOffWebServer();
+void turnOnWebServer();
 void toggleWebServer();
 
 void serverSetup();

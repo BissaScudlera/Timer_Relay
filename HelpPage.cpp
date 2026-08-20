@@ -15,14 +15,19 @@ code{background:#eeeeee;padding:2px 4px}
 <body>
 <div class='card'>
 <h1>Timer Relay - Help</h1>
-<p>This page describes the digital inputs and their functions.</p>
+<p>This page describes the digital I/Os and their functions.</p>
 <h2>Digital Inputs</h2>
 <table>
 <tr><th>Function</th><th>ESP32 GPIO</th><th>MCP23017 #2</th><th>Description</th></tr>
-<tr><td>START</td><td>GPIO D4</td><td>GPA7</td><td>Short press: Start irrigation cycle.</td></tr>
-<tr><td>STOP</td><td>GPIO D5</td><td>GPA6</td><td>Short press: Stop irrigation cycle.<br>Long press: Toggle Wifi activation.</td></tr>
-<tr><td>Factory Reset</td><td>GPIO D18</td><td>-</td><td>Read only during boot. Loads default configuration and overwrites stored Preferences.</td></tr>
-<tr><td>Debug Setup</td><td>GPIO D19</td><td>-</td><td>Read only during boot. When active, enables setup debug mode, pauses after initialization and displays diagnostic information before entering the main loop.</td></tr>
+<tr><td>START</td><td>GPIO D32</td><td>GPA7</td><td>Short press: Start irrigation cycle.</td></tr>
+<tr><td>STOP</td><td>GPIO D33</td><td>GPA6</td><td>Short press: Stop irrigation cycle.</td></tr>
+</table>
+<h2>Configuration Jumpers</h2>
+<table>
+<tr><th>Function</th><th>ESP32 GPIO</th><th>Description</th></tr>
+<tr><td>Debug Setup</td><td>GPIO D19</td><td>Read only during boot. When active, enables setup debug mode, pauses after initialization and displays diagnostic information before entering the main loop.</td></tr>
+<tr><td>Factory Reset</td><td>GPIO D18</td><td>Read only during boot. Loads default configuration and overwrites stored Preferences.</td></tr>
+<tr><td>Wifi Activation</td><td>GPIO D5</td><td>Enable the wifi interface.</td></tr>
 </table>
 <h2>Input Logic</h2>
 <ul>
@@ -47,7 +52,7 @@ code{background:#eeeeee;padding:2px 4px}
 <table>
 <tr><th>BankC Bit</th><th>MCP Pin</th><th>Function</th></tr>
 <!-- RELAY_NUMBER 22 outputs 23-24  not available to timer-->
-<tr><td>7</td><td>GPB7</td><td>Unused</td></tr>
+<tr><td>7</td><td>GPB7</td><td>Error</td></tr>
 <tr><td>6</td><td>GPB6</td><td>Unused</td></tr>
 <tr><td>5</td><td>GPB5</td><td>IRR22</td></tr>
 <tr><td>4</td><td>GPB4</td><td>IRR21</td></tr>

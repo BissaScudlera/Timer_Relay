@@ -10,12 +10,30 @@
 
 inline const char* diagnosticsRtcState()
 {
-    return rtcGetStatus().available ? "OK" : "ERROR";
+    static char buffer[64];
+
+    const auto& status = rtcGetStatus();
+
+    snprintf(buffer, sizeof(buffer),
+         "Running:[%s] Last Error (%d) %s",
+         status.available ? "OK" : "ERROR",
+         status.lastError,
+         status.message);
+		 
+    return buffer;
 }
 
 inline const char* diagnosticsI2CState()
 {
-    return i2cGetStatus().available ? "OK" : "ERROR";
+    static char buffer[32];
+
+    const auto& status = i2cGetStatus();
+
+    if (status.available)
+        return "OK";
+
+    snprintf(buffer, sizeof(buffer), "ERROR (%d)", status.lastError);
+    return buffer;
 }
 
 inline const char* diagnosticsWiFiState()

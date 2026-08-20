@@ -41,6 +41,7 @@ bool rtcRecover(void)
 
     if (!i2cDevicePresent(0x68))
     {
+        rtcStatus.setError(-4), "not found";
         return false;
     }
 
@@ -52,6 +53,7 @@ bool rtcRecover(void)
 
     if (!rtcReadCached(cachedNow))
     {
+        rtcStatus.setError(-1);
         return false;
     }
 
@@ -65,6 +67,7 @@ bool rtcUpdate(void)
 
     if (!rtcReadCached(cachedNow))
     {
+        rtcStatus.setError(-1, "unavailable");
         return false;
     }
 

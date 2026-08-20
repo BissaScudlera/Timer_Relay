@@ -47,14 +47,14 @@ struct DeviceStatus
 
         lastUpdateMs = millis();
         lastOk = lastUpdateMs;
-        lastError = 0;
+        //lastError = 0;
 
-        strncpy(message, msg, sizeof(message));
-        message[sizeof(message) - 1] = '\0';
+        //strncpy(message, msg, sizeof(message));
+        //message[sizeof(message) - 1] = '\0';
     }
 
     inline void setError(int16_t errorCode,
-                         const char *msg = "Error")
+                         const char *msg = " ")
     {
         available = false;
         lastOperationOk = false;

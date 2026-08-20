@@ -54,6 +54,46 @@ void toggleWebServer()
     }
 }
 
+void turnOffWebServer()
+{
+    if (webServerAttivo)
+    {
+        server.stop();
+
+        WiFi.softAPdisconnect(true);
+
+        webServerAttivo = false;
+
+        DBG_PRINTLN("\r\n[SYS] Wi-Fi e Web Server DISATTIVATI.");
+    }
+    else
+    {
+        return;
+    }
+}
+	
+void turnOnWebServer()
+{
+    if (webServerAttivo)
+    {
+        return;
+    }
+    else
+    {
+      if (WiFi.softAP(configWifi.ssid, configWifi.pswd))
+        {
+            server.begin();
+
+            webServerAttivo = true;
+
+            DBG_PRINTLN("\r\n[SYS] Wi-Fi e Web Server ATTIVATI.");
+            DBG_PRINT("[SYS] SSID: ");
+            DBG_PRINTLN(String(configWifi.ssid));
+            DBG_PRINTLN("[SYS] IP: 192.168.4.1");
+        }
+    }
+}
+
 //------------------------------------------------------------
 
 void serverSetup()
